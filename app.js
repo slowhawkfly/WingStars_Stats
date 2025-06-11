@@ -115,7 +115,9 @@ document.getElementById("modalClose").onclick = () => {
 }
 
 document.getElementById("modal").addEventListener("click", function(e) {
-  if (e.target === this) this.classList.add("hidden");
+  if (e.target === this || e.target.classList.contains('modal')) {
+    this.classList.add("hidden");
+  }
 });
 
 function showPhoto(src) {
@@ -128,7 +130,9 @@ document.getElementById("photoModalClose").onclick = () => {
 }
 
 document.getElementById("photoModal").addEventListener("click", function(e) {
-  if (e.target === this) this.classList.add("hidden");
+  if (e.target === this || e.target.classList.contains('modal')) {
+    this.classList.add("hidden");
+  }
 });
 
 loadData();
