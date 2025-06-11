@@ -1,0 +1,118 @@
+let fullData = {};
+let sortState = {"combined": null, "home": null, "away": null};
+let chartRendered = {"chartA": false, "chartC": false, "chartD": false, "attendance": false, "heatmap": false};
+
+async function loadData() {
+  const res = await fetch('cheerleader_stats_data.json');
+  fullData = await res.json();
+  document.getElementById("loading").style.display = "none";
+  ['home','away','combined'].forEach(type => renderTable(type));
+}
+
+function renderTable(type) {
+  const container = document.getElementById(type);
+  container.innerHTML = "";
+  let data = fullData[type];
+  if (!data || data.length === 0) {
+    container.innerHTML = "<div>目前尚無資料</div>";
+    return;
+  }
+  data = [...data];
+
+  const table = document.createElement('table');
+  table.innerHTML = `<thead><tr>
+      <th>照片</th><th data-field="name">成員</th><th data-field="total">出賽數</th>
+      <th data-field="win">勝場數</th><th data-field="lose">敗場數</th>
+      <th data-field="winRate">勝率</th><th data-field="current">目前連勝/敗</th>
+      <th>出勤明細</th></tr></thead><tbody></tbody>`;
+
+  if (sortState[type]) {
+    const {field, asc} = sortState[type];
+    data.sort((a,b) => {
+      let valA = a[field], valB = b[field];
+      if (field === 'current') {
+        const extract = s => s.includes('連勝') ? parseInt(s) : s.includes('連敗') ? -parseInt(s) : 0;
+        valA = extract(valA); valB = extract(valB);
+      }
+      return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
+    });
+  }
+
+  const tbody = table.querySelector('tbody');
+  data.forEach(item => {
+    const imageName = item.name.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z]/g, '');
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>
+        <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img">
+      </td>
+      <td>${item.name}</td><td>${item.total}</td><td>${item.win}</td><td>${item.lose}</td>
+      <td>${(item.winRate*100).toFixed(1)}%</td><td>${item.current}</td>
+      <td><button class='view-btn' onclick='showDetail("${item.name}","${type}")'>查看</button></td>`;
+    tbody.appendChild(row);
+  });
+  container.appendChild(table);
+  table.querySelectorAll('th[data-field]').forEach(th=>{
+    th.onclick = ()=>{ const field = th.dataset.field;
+      if (sortState[type] && sortState[type].field === field)
+        sortState[type].asc = !sortState[type].asc;
+      else sortState[type] = { field: field, asc: false };
+      renderTable(type);
+    }
+  });
+}
+
+function renderAttendanceTable() {
+  const container = document.getElementById('attendance');
+  const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
+  const table = document.createElement('table');
+  table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
+  const tbody = table.querySelector('tbody');
+  data.forEach(item => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${item.name}</td><td>${item.total}</td>`;
+    tbody.appendChild(row);
+  });
+  container.appendChild(table);
+}
+
+// 簡化版 - 這裡先只完整保留核心 tab 切換和明細
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', e => {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    e.target.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    const type = e.target.dataset.type;
+    document.getElementById(type).classList.add('active');
+
+    if (type === 'attendance' && !chartRendered.attendance) { renderAttendanceTable(); chartRendered.attendance = true; return; }
+    if (type !== 'chartA' && type !== 'chartC' && type !== 'chartD' && type !== 'attendance' && type !== 'heatmap') {
+      sortState[type] = null;
+      renderTable(type);
+    }
+  });
+});
+
+function showDetail(name, type) {
+  const item = fullData[type].find(d => d.name === name);
+  document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
+  const ul = document.getElementById('modalList'); 
+  ul.innerHTML = '';
+
+  item.detail.forEach((d, idx) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span>${d.date}（${d.weekday_fixed}）</span>
+      <span>${d.stadium}</span>
+      <span>${d.opponent_fixed} ${d.opp_score}：${d.self_score} 啾啾</span>
+      <span>${d.result}</span>`;
+    ul.appendChild(li);
+  });
+
+  document.getElementById("modal").classList.remove("hidden");
+}
+
+document.getElementById("modalClose").onclick = () => {
+  document.getElementById("modal").classList.add("hidden");
+}
+
+loadData();
