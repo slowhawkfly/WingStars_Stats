@@ -3,31 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wing Stars 戰績排行榜（V2.5）</title>
+  <title>Wing Stars 戰績排行榜（V3.1 美化版）</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background-color: #F9FAFB; color: #111827; }
-    th { cursor: pointer; }
-    .avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; background-color: #FCA5A5; display: inline-block; }
-    .nav-tabs .nav-link.active { background-color: #34D399; color: white; }
-    .table-striped>tbody>tr:nth-of-type(odd) { background-color: #F3F4F6; }
-    .btn-outline-primary { border-color: #FCA5A5; color: #FCA5A5; }
-    .btn-outline-primary:hover { background-color: #FB7185; color: white; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="p-4">
 
-  <h1 class="mb-4" id="pageTitle">Wing Stars 戰績排行榜（V2.5）</h1>
+  <h1>Wing Stars 戰績排行榜（V3.1 美化版）</h1>
 
-  <ul class="nav nav-tabs" id="tabs">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#home" data-type="home">主場戰績</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#away" data-type="away">客場戰績</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#combined" data-type="combined">總戰績</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#attendance" data-type="attendance">出勤場次排行榜</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartA" data-type="chartA">勝率排行榜</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartC" data-type="chartC">主客場勝率比較</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartD" data-type="chartD">連勝連敗排行榜</button></li>
-  </ul>
+  <div class="card">
+    <ul class="nav nav-tabs" id="tabs">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#home" data-type="home">主場戰績</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#away" data-type="away">客場戰績</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#combined" data-type="combined">總戰績</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#attendance" data-type="attendance">出勤場次排行榜</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartA" data-type="chartA">勝率排行榜</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartC" data-type="chartC">主客場勝率比較</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartD" data-type="chartD">連勝連敗排行榜</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#contribution" data-type="contribution">勝率貢獻分析</button></li>
+    </ul>
+  </div>
 
   <div class="tab-content mt-3">
     <div class="tab-pane fade show active" id="home"></div>
@@ -37,7 +32,9 @@
     <div class="tab-pane fade" id="chartA"><canvas id="canvasA" height="400"></canvas></div>
     <div class="tab-pane fade" id="chartC"><canvas id="canvasC" height="400"></canvas></div>
     <div class="tab-pane fade" id="chartD"><canvas id="canvasD" height="400"></canvas></div>
+    <div class="tab-pane fade" id="contribution"><canvas id="canvasContri" height="400"></canvas></div>
   </div>
+
   <div class="modal fade" id="detailModal" tabindex="-1">
     <div class="modal-dialog"><div class="modal-content">
       <div class="modal-header">
@@ -52,7 +49,7 @@
 <script>
 let fullData = {};
 let sortState = {"combined": null, "home": null, "away": null};
-let chartRendered = {"chartA": false, "chartC": false, "chartD": false, "attendance": false};
+let chartRendered = {"chartA": false, "chartC": false, "chartD": false, "attendance": false, "contribution": false};
 
 async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
@@ -111,25 +108,22 @@ function renderTable(type) {
 function renderAttendanceTable() {
   const container = document.getElementById('attendance');
   const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
-
   const table = document.createElement('table');
   table.className = "table table-striped table-hover align-middle";
   table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
-
   const tbody = table.querySelector('tbody');
   data.forEach(item => {
     const row = document.createElement('tr');
     row.innerHTML = `<td>${item.name}</td><td>${item.total}</td>`;
     tbody.appendChild(row);
   });
-
   container.appendChild(table);
 }
+
 function renderChartA() {
   const data = [...fullData['combined']].sort((a,b)=>b.winRate - a.winRate);
   const names = data.map(d => d.name);
   const rates = data.map(d => (d.winRate*100).toFixed(1));
-
   new Chart(document.getElementById('canvasA'), {
     type: 'bar',
     data: { labels: names, datasets: [{ label: '勝率 (%)', data: rates, backgroundColor: '#34D399' }] },
@@ -145,7 +139,6 @@ function renderChartC() {
   const awayMap = Object.fromEntries(awayData.map(d => [d.name, d.winRate*100]));
   const homeRates = names.map(n => homeMap[n] || 0);
   const awayRates = names.map(n => awayMap[n] || 0);
-
   new Chart(document.getElementById('canvasC'), {
     type: 'bar',
     data: { labels: names, datasets: [
@@ -162,10 +155,8 @@ function renderChartD() {
     streak: d.current.includes('連勝') ? parseInt(d.current) :
             d.current.includes('連敗') ? -parseInt(d.current) : 0
   })).sort((a,b)=>b.streak - a.streak);
-
   const names = data.map(d => d.name);
   const streaks = data.map(d => d.streak);
-
   new Chart(document.getElementById('canvasD'), {
     type: 'bar',
     data: { labels: names, datasets: [{
@@ -176,6 +167,29 @@ function renderChartD() {
     options: { responsive: true, indexAxis: 'x', scales: { y: { beginAtZero: true } } }
   });
 }
+
+function renderContribution() {
+  const data = [...fullData['combined']];
+  const teamTotalWin = data.reduce((sum, d) => sum + d.win, 0);
+  const teamTotalGames = data.reduce((sum, d) => sum + d.total, 0);
+  const teamWinRate = teamTotalWin / teamTotalGames;
+  const contribData = data.map(d => ({
+    name: d.name,
+    contrib: (d.winRate - teamWinRate) * 100
+  })).sort((a,b)=>b.contrib - a.contrib);
+  const names = contribData.map(d => d.name);
+  const contribs = contribData.map(d => d.contrib.toFixed(1));
+  new Chart(document.getElementById('canvasContri'), {
+    type: 'bar',
+    data: { labels: names, datasets: [{
+      label: '勝率貢獻值 (%)',
+      data: contribs,
+      backgroundColor: contribs.map(v => v >= 0 ? '#34D399' : '#F87171')
+    }] },
+    options: { responsive: true, indexAxis: 'x', scales: { y: { beginAtZero: true } } }
+  });
+}
+
 function showDetail(name, type) {
   const item = fullData[type].find(d => d.name === name);
   document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
@@ -207,7 +221,8 @@ document.querySelectorAll('#tabs button').forEach(btn => {
     if (type === 'chartC' && !chartRendered.chartC) { renderChartC(); chartRendered.chartC = true; return; }
     if (type === 'chartD' && !chartRendered.chartD) { renderChartD(); chartRendered.chartD = true; return; }
     if (type === 'attendance' && !chartRendered.attendance) { renderAttendanceTable(); chartRendered.attendance = true; return; }
-    if (type !== 'chartA' && type !== 'chartC' && type !== 'chartD' && type !== 'attendance') {
+    if (type === 'contribution' && !chartRendered.contribution) { renderContribution(); chartRendered.contribution = true; return; }
+    if (type !== 'chartA' && type !== 'chartC' && type !== 'chartD' && type !== 'attendance' && type !== 'contribution') {
       sortState[type] = null;
       renderTable(type);
     }
