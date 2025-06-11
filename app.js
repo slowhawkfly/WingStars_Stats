@@ -25,6 +25,7 @@ function calcAxisLimit(dataArr) {
   if (max > 100) max = 100;
   return { min, max };
 }
+
 function renderAllTables() {
   renderMainTable("homeTable", fullData.home);
   renderMainTable("awayTable", fullData.away);
@@ -91,6 +92,7 @@ function renderAttendanceTable() {
     table.appendChild(tr);
   });
 }
+
 function renderChartA() {
   const ctx = document.getElementById("chartA").getContext("2d");
   const sorted = [...fullData.combined].sort((a, b) => b.winRate - a.winRate);
@@ -164,6 +166,7 @@ function renderChartC() {
     }
   });
 }
+
 function renderChartD() {
   const ctx = document.getElementById("chartD").getContext("2d");
 
@@ -193,3 +196,45 @@ function renderChartD() {
     }
   });
 }
+
+function showDetail(name, type) {
+  const item = fullData[type].find(d => d.name === name);
+  document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
+  const ul = document.getElementById('modalList');
+  ul.innerHTML = '';
+
+  item.detail.forEach((d) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span>${d.date}（${d.weekday_fixed}）</span>
+      <span>${d.stadium}</span>
+      <span>${d.opponent_fixed} ${d.opp_score}：${d.self_score} 啾啾</span>
+      <span>${d.result}</span>`;
+    ul.appendChild(li);
+  });
+
+  document.getElementById("modal").classList.remove("hidden");
+}
+
+document.getElementById("modalClose").onclick = () => {
+  document.getElementById("modal").classList.add("hidden");
+};
+
+document.getElementById("modal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
+});
+
+function showPhoto(src) {
+  document.getElementById('photoModalImg').src = src;
+  document.getElementById('photoModal').classList.remove("hidden");
+}
+
+document.getElementById("photoModalClose").onclick = () => {
+  document.getElementById("photoModal").classList.add("hidden");
+};
+
+document.getElementById("photoModal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
+});
+
+loadData();
