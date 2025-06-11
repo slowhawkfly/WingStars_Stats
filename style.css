@@ -1,10 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap');
 
 :root {
-  --gold: #c89f35;
   --pink: #e43f84;
+  --pink-light: #fce8f0;
+  --gold: #d4b15f; /* 降低飽和度的柔和金色，僅作點綴 */
   --bg: #fff7f9;
-  --card-bg: #fffafd;
+  --card-bg: #fff;
   --gray: #f3e5e9;
   --text: #333;
   --shadow: rgba(0, 0, 0, 0.1);
@@ -24,7 +25,7 @@ body {
 }
 
 .header-bar {
-  background: linear-gradient(90deg, var(--gold), var(--pink));
+  background: linear-gradient(90deg, var(--pink), var(--gold));
   color: white;
   padding: 1.5rem;
   border-radius: 1rem;
@@ -60,7 +61,7 @@ body {
 }
 
 .tab.active {
-  background: linear-gradient(90deg, var(--gold), var(--pink));
+  background: var(--pink);
   color: white;
   box-shadow: 0 4px 12px var(--shadow);
 }
@@ -85,7 +86,7 @@ table {
 }
 
 thead {
-  background: #fce8f0;
+  background: var(--pink-light);
 }
 
 thead th {
@@ -142,7 +143,7 @@ button.view-btn:hover {
   justify-content: center;
   align-items: center;
   font-size: 1.8rem;
-  color: var(--gold);
+  color: var(--pink);
 }
 
 /* Modal 設計 */
@@ -168,6 +169,8 @@ button.view-btn:hover {
   width: 90%;
   max-width: 600px;
   position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .modal-content h2 {
@@ -192,7 +195,7 @@ button.view-btn:hover {
 }
 
 #modalList li:nth-child(even) {
-  background: #fce8f0;
+  background: var(--pink-light);
 }
 
 .modal-close {
