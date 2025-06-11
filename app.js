@@ -123,7 +123,13 @@ function renderChartA() {
     options: {
       responsive: true,
       indexAxis: 'y',
-      scales: { x: { min: axis.min, max: axis.max } }
+      scales: { 
+        x: { 
+          min: axis.min, 
+          max: axis.max,
+          ticks: { stepSize: 10 }
+        }
+      }
     }
   });
 }
@@ -152,7 +158,13 @@ function renderChartC() {
     options: {
       responsive: true,
       indexAxis: 'y',
-      scales: { x: { min: axis.min, max: axis.max } }
+      scales: { 
+        x: { 
+          min: axis.min, 
+          max: axis.max,
+          ticks: { stepSize: 10 }
+        }
+      }
     }
   });
 }
