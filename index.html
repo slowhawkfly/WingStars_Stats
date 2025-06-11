@@ -133,7 +133,7 @@ function renderChartA() {
   new Chart(document.getElementById('canvasA'), {
     type: 'bar',
     data: { labels: names, datasets: [{ label: '勝率 (%)', data: rates, backgroundColor: '#34D399' }] },
-    options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100 } } }
+    options: { responsive: true, indexAxis: 'x', scales: { y: { beginAtZero: true, max: 100 } } }
   });
 }
 
@@ -152,7 +152,7 @@ function renderChartC() {
       { label: '主場勝率', data: homeRates, backgroundColor: '#60A5FA' },
       { label: '客場勝率', data: awayRates, backgroundColor: '#FBBF24' }
     ] },
-    options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100 } } }
+    options: { responsive: true, indexAxis: 'x', scales: { y: { beginAtZero: true, max: 100 } } }
   });
 }
 
@@ -173,7 +173,7 @@ function renderChartD() {
       data: streaks,
       backgroundColor: streaks.map(v => v>=0 ? '#34D399' : '#F87171')
     }] },
-    options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true } } }
+    options: { responsive: true, indexAxis: 'x', scales: { y: { beginAtZero: true } } }
   });
 }
 function showDetail(name, type) {
