@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wing Stars 戰績排行榜 V1.8 </title>
+  <title>Wing Stars 戰績排行榜（V1.9）</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background-color: #F9FAFB; color: #111827; }
@@ -17,8 +17,15 @@
 </head>
 <body class="p-4">
 
-  <h1 class="mb-4" id="pageTitle">Wing Stars 戰績排行榜（V1.8）</h1>
+  <h1 class="mb-4" id="pageTitle">Wing Stars 戰績排行榜（V1.9）</h1>
 
+  <!-- 新增圖表區 -->
+  <div class="mb-5">
+    <h3>成員勝率排行榜</h3>
+    <canvas id="winRateChart" height="400"></canvas>
+  </div>
+
+  <!-- 既有頁籤 -->
   <ul class="nav nav-tabs" id="tabs">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#home" data-type="home">主場戰績</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#away" data-type="away">客場戰績</button></li>
@@ -31,6 +38,7 @@
     <div class="tab-pane fade" id="combined"></div>
   </div>
 
+  <!-- 出勤明細 Modal -->
   <div class="modal fade" id="detailModal" tabindex="-1">
     <div class="modal-dialog"><div class="modal-content">
       <div class="modal-header">
@@ -41,14 +49,44 @@
     </div></div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 let fullData = {};
 let sortState = {"combined": null, "home": null, "away": null};
+let winChart = null;
 
 async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
   fullData = await res.json();
   ['home','away','combined'].forEach(type => renderTable(type));
+  renderChart(); // 畫圖表
+}
+
+function renderChart() {
+  const data = [...fullData['combined']].sort((a,b)=>b.winRate - a.winRate);
+  const names = data.map(d => d.name);
+  const rates = data.map(d => (d.winRate*100).toFixed(1));
+
+  const ctx = document.getElementById('winRateChart').getContext('2d');
+  if (winChart) winChart.destroy();
+  winChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: names,
+      datasets: [{
+        label: '勝率 (%)',
+        data: rates,
+        backgroundColor: '#34D399'
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      scales: {
+        x: { beginAtZero: true, max: 100 }
+      }
+    }
+  });
 }
 
 function renderTable(type) {
@@ -61,7 +99,7 @@ function renderTable(type) {
     return;
   }
 
-  data = [...data]; // clone array
+  data = [...data];
 
   const table = document.createElement('table');
   table.className = "table table-striped table-hover align-middle";
@@ -140,12 +178,12 @@ function showDetail(name, type) {
 function updateTitleDate() {
   const title = document.getElementById("pageTitle");
   const today = new Date();
-  today.setDate(today.getDate() - 1); // 昨天
+  today.setDate(today.getDate() - 1);
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, '0');
   const dd = String(today.getDate()).padStart(2, '0');
   const dateStr = `${yyyy}-${mm}-${dd}`;
-  title.innerText = `Wing Stars 戰績排行榜 (截至 ${dateStr})`;
+  title.innerText = `Wing Stars 戰績排行榜（截至 ${dateStr}）`;
 }
 
 document.querySelectorAll('#tabs button').forEach(btn => {
