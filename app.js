@@ -114,8 +114,8 @@ document.getElementById("modalClose").onclick = () => {
   document.getElementById("modal").classList.add("hidden");
 };
 
-document.getElementById("modal").addEventListener("click", function() {
-  this.classList.add("hidden");
+document.getElementById("modal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
 });
 
 function showPhoto(src) {
@@ -127,13 +127,8 @@ document.getElementById("photoModalClose").onclick = () => {
   document.getElementById("photoModal").classList.add("hidden");
 };
 
-document.getElementById("photoModal").addEventListener("click", function() {
-  this.classList.add("hidden");
-});
-
-// 最關鍵的阻止冒泡機制：
-document.querySelectorAll('.modal-content, .photo-modal-content').forEach(modalContent => {
-  modalContent.addEventListener('click', e => e.stopPropagation());
+document.getElementById("photoModal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
 });
 
 loadData();
