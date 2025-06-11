@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap');
 
 body {
-  background-color: #f9fafb;
-  color: #111827;
+  background-color: #fff7f9;
+  color: #3b3b3b;
   font-family: 'Inter', 'Noto Sans TC', sans-serif;
   line-height: 1.6;
   margin: 0;
@@ -10,7 +10,7 @@ body {
 }
 
 .header-bar {
-  background: linear-gradient(90deg, #10b981, #ec4899);
+  background: linear-gradient(90deg, #c89f35, #e43f84);
   color: white;
   padding: 1.5rem 2rem;
   border-radius: 1rem;
@@ -24,7 +24,7 @@ body {
 
 h1 {
   font-weight: 600;
-  color: #10b981;
+  color: #c89f35;
   margin: 2rem 0 1rem 0;
   font-size: 2rem;
   text-align: center;
@@ -39,26 +39,26 @@ h1 {
 
 .nav-tabs .nav-link {
   border: none;
-  color: #374151;
+  color: #555555;
   font-weight: 500;
-  background-color: #e5e7eb;
+  background-color: #f3e5e9;
   border-radius: 9999px;
   padding: 0.6rem 1.4rem;
   transition: all 0.3s ease;
 }
 
 .nav-tabs .nav-link:hover {
-  background-color: #d1d5db;
+  background-color: #ead6db;
 }
 
 .nav-tabs .nav-link.active {
-  background: linear-gradient(90deg, #10b981, #ec4899);
+  background: linear-gradient(90deg, #c89f35, #e43f84);
   color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .card {
-  background: #ffffff;
+  background: #fffafd;
   border-radius: 1.5rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   padding: 2rem;
@@ -78,8 +78,8 @@ h1 {
 }
 
 .table thead th {
-  background: #f3f4f6;
-  color: #374151;
+  background: #fce8f0;
+  color: #5c5c5c;
   font-weight: 600;
   padding: 1rem;
   border-bottom: none;
@@ -100,74 +100,6 @@ h1 {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
-.avatar-placeholder {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #10b981, #ec4899);
-  display: inline-block;
-}
-
-.btn-outline-primary {
-  border-color: #ec4899;
-  color: #ec4899;
-  font-weight: 600;
-  border-radius: 999px;
-  padding: 0.5rem 1.5rem;
-  transition: 0.3s;
-}
-
-.btn-outline-primary:hover {
-  background: #ec4899;
-  color: #fff;
-}
-
-#loading {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(255, 255, 255, 0.95);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  color: #10b981;
-}
-
-.modal-body ul {
-  padding: 0;
-  list-style: none;
-}
-
-.modal-body li {
-  border: none;
-  background: #f9fafb;
-  margin-bottom: 12px;
-  border-radius: 10px;
-  padding: 1rem 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  font-size: 1rem;
-}
-
-.modal-body li span {
-  white-space: nowrap;
-  margin-right: 10px;
-}
-
-#canvasHeatmap {
-  margin-top: 2rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 1rem;
-  background: #fff;
-  padding: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.tab-pane {
-  min-height: 400px;
-}
-
 .avatar-img {
   width: 50px;
   height: 50px;
@@ -181,6 +113,66 @@ h1 {
   transform: scale(1.1);
 }
 
+.btn-outline-primary {
+  border-color: #e43f84;
+  color: #e43f84;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.5rem 1.5rem;
+  transition: 0.3s;
+}
+
+.btn-outline-primary:hover {
+  background: #e43f84;
+  color: #fff;
+}
+
+#loading {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #c89f35;
+}
+
+.modal-body ul {
+  padding: 0;
+  list-style: none;
+}
+
+.modal-body li {
+  border: none;
+  background: #fffafd;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+}
+
 .modal-body li.even-row {
-  background-color: #f3f4f6;
+  background-color: #fce8f0;
+}
+
+.modal-body li span {
+  white-space: nowrap;
+  margin-right: 10px;
+}
+
+#canvasHeatmap {
+  margin-top: 2rem;
+  border: 1px solid #f3e5e9;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.tab-pane {
+  min-height: 400px;
 }
