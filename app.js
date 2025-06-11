@@ -66,7 +66,6 @@ function renderTable(type) {
     }
   });
 }
-
 function renderAttendanceTable() {
   const container = document.getElementById('attendance');
   const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
@@ -90,7 +89,11 @@ document.querySelectorAll('.tab').forEach(btn => {
     document.getElementById(type).classList.add('active');
 
     if (type === 'attendance' && !chartRendered.attendance) { renderAttendanceTable(); chartRendered.attendance = true; return; }
-    if (type !== 'chartA' && type !== 'chartC' && type !== 'chartD' && type !== 'attendance' && type !== 'heatmap') {
+    if (type === 'chartA' && !chartRendered.chartA) { renderChartA(); chartRendered.chartA = true; }
+    if (type === 'chartC' && !chartRendered.chartC) { renderChartC(); chartRendered.chartC = true; }
+    if (type === 'chartD' && !chartRendered.chartD) { renderChartD(); chartRendered.chartD = true; }
+    if (type === 'heatmap' && !chartRendered.heatmap) { renderHeatmap(); chartRendered.heatmap = true; }
+    if (['home','away','combined'].includes(type)) {
       sortState[type] = null;
       renderTable(type);
     }
@@ -136,5 +139,115 @@ document.getElementById("photoModalClose").onclick = () => {
 document.getElementById("photoModal").addEventListener("click", function(e) {
   if (e.target === e.currentTarget) this.classList.add("hidden");
 });
+function renderChartA() {
+  const ctx = document.getElementById("canvasA").getContext("2d");
+  const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
+  const labels = data.map(d => d.name);
+  const winRates = data.map(d => (d.winRate*100).toFixed(1));
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '勝率 %',
+        data: winRates
+      }]
+    },
+    options: {
+      responsive: true,
+      indexAxis: 'y'
+    }
+  });
+}
+
+function renderChartC() {
+  const ctx = document.getElementById("canvasC").getContext("2d");
+  const combined = fullData['combined'];
+  const home = fullData['home'];
+  const away = fullData['away'];
+
+  const labels = combined.map(d => d.name);
+  const homeRates = home.map(d => (d.winRate*100).toFixed(1));
+  const awayRates = away.map(d => (d.winRate*100).toFixed(1));
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: '主場勝率', data: homeRates },
+        { label: '客場勝率', data: awayRates }
+      ]
+    },
+    options: {
+      responsive: true,
+      indexAxis: 'y'
+    }
+  });
+}
+
+function renderChartD() {
+  const ctx = document.getElementById("canvasD").getContext("2d");
+  const data = [...fullData['combined']];
+
+  const labels = data.map(d => d.name);
+  const streaks = data.map(d => {
+    if (d.current.includes("連勝")) return parseInt(d.current);
+    if (d.current.includes("連敗")) return -parseInt(d.current);
+    return 0;
+  });
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '目前連勝/連敗',
+        data: streaks
+      }]
+    },
+    options: {
+      responsive: true,
+      indexAxis: 'y'
+    }
+  });
+}
+
+function renderHeatmap() {
+  const ctx = document.getElementById("canvasHeatmap").getContext("2d");
+  const members = [...fullData['combined']];
+  const games = [...new Set(members.flatMap(m => m.detail.map(d => d.date)))].sort();
+  const dataMatrix = [];
+
+  members.forEach((m, mi) => {
+    games.forEach((g, gi) => {
+      const played = m.detail.some(d => d.date === g) ? 1 : 0;
+      dataMatrix.push({x: gi, y: mi, v: played});
+    });
+  });
+
+  new Chart(ctx, {
+    type: 'matrix',
+    data: {
+      datasets: [{
+        label: '出勤熱力圖',
+        data: dataMatrix,
+        backgroundColor(ctx) {
+          const value = ctx.dataset.data[ctx.dataIndex].v;
+          return value ? '#ff7eb3' : '#eee';
+        },
+        width: 20,
+        height: 20
+      }]
+    },
+    options: {
+      scales: {
+        x: { type: 'category', labels: games },
+        y: { type: 'category', labels: members.map(m => m.name) }
+      }
+    }
+  });
+}
 
 loadData();
