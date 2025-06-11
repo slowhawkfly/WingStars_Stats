@@ -1,6 +1,6 @@
 let fullData = {};
 let sortState = {"combined": null, "home": null, "away": null};
-let chartRendered = {"chartA": false, "chartC": false, "chartD": false, "attendance": false, "heatmap": false};
+let chartRendered = {"chartA": false, "chartC": false, "chartD": false, "attendance": false};
 
 async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
@@ -92,7 +92,6 @@ document.querySelectorAll('.tab').forEach(btn => {
     if (type === 'chartA' && !chartRendered.chartA) { renderChartA(); chartRendered.chartA = true; }
     if (type === 'chartC' && !chartRendered.chartC) { renderChartC(); chartRendered.chartC = true; }
     if (type === 'chartD' && !chartRendered.chartD) { renderChartD(); chartRendered.chartD = true; }
-    if (type === 'heatmap' && !chartRendered.heatmap) { renderHeatmap(); chartRendered.heatmap = true; }
     if (['home','away','combined'].includes(type)) {
       sortState[type] = null;
       renderTable(type);
@@ -153,7 +152,6 @@ function renderChartC() {
     }
   });
 }
-
 function renderChartD() {
   const ctx = document.getElementById("canvasD").getContext("2d");
   let data = [...fullData['combined']];
@@ -185,51 +183,45 @@ function renderChartD() {
     }
   });
 }
-function renderHeatmap() {
-  const ctx = document.getElementById("canvasHeatmap").getContext("2d");
-  const members = [...fullData['combined']];
-  const allDates = [...new Set(members.flatMap(m => m.detail.map(d => d.date)))].sort();
 
-  const memberLabels = members.map(m => m.name);
-  const dateLabels = allDates;
+function showDetail(name, type) {
+  const item = fullData[type].find(d => d.name === name);
+  document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
+  const ul = document.getElementById('modalList'); 
+  ul.innerHTML = '';
 
-  const matrixData = [];
-
-  members.forEach((m, mi) => {
-    dateLabels.forEach((d, di) => {
-      const played = m.detail.some(item => item.date === d) ? 1 : 0;
-      matrixData.push({x: di, y: mi, v: played});
-    });
+  item.detail.forEach((d, idx) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span>${d.date}（${d.weekday_fixed}）</span>
+      <span>${d.stadium}</span>
+      <span>${d.opponent_fixed} ${d.opp_score}：${d.self_score} 啾啾</span>
+      <span>${d.result}</span>`;
+    ul.appendChild(li);
   });
 
-  new Chart(ctx, {
-    type: 'matrix',
-    data: {
-      datasets: [{
-        label: '出勤熱力圖',
-        data: matrixData,
-        backgroundColor: ctx => {
-          const value = ctx.dataset.data[ctx.dataIndex].v;
-          return value ? '#ff99cc' : '#f0f0f0';
-        },
-        width: 20,
-        height: 20
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          type: 'category',
-          labels: dateLabels,
-          title: { display: true, text: '日期' }
-        },
-        y: {
-          type: 'category',
-          labels: memberLabels,
-          title: { display: true, text: '成員' }
-        }
-      }
-    }
-  });
+  document.getElementById("modal").classList.remove("hidden");
 }
+
+document.getElementById("modalClose").onclick = () => {
+  document.getElementById("modal").classList.add("hidden");
+};
+
+document.getElementById("modal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
+});
+
+function showPhoto(src) {
+  document.getElementById('photoModalImg').src = src;
+  document.getElementById('photoModal').classList.remove("hidden");
+}
+
+document.getElementById("photoModalClose").onclick = () => {
+  document.getElementById("photoModal").classList.add("hidden");
+};
+
+document.getElementById("photoModal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
+});
+
+loadData();
