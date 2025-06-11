@@ -42,7 +42,7 @@
 let fullData = {};
 
 async function loadData() {
-  const res = await fetch('./cheerleader_stats_data.json');
+  const res = await fetch('/WingStars_Stats/cheerleader_stats_data.json')
   fullData = await res.json();
   renderCards("home");
 }
