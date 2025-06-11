@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title> Wing Stars 戰績排行榜（V1.8）</title>
+  <title>Wing Stars 戰績排行榜（V1.8）</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background-color: #F9FAFB; color: #111827; }
@@ -17,7 +17,7 @@
 </head>
 <body class="p-4">
 
-  <h1 class="mb-4">Wing Stars 戰績排行榜（V1.8）</h1>
+  <h1 class="mb-4" id="pageTitle">Wing Stars 戰績排行榜（V1.8）</h1>
 
   <ul class="nav nav-tabs" id="tabs">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#home" data-type="home">主場戰績</button></li>
@@ -137,6 +137,17 @@ function showDetail(name, type) {
   new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
 
+function updateTitleDate() {
+  const title = document.getElementById("pageTitle");
+  const today = new Date();
+  today.setDate(today.getDate() - 1); // 昨天
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+  title.innerText = `Wing Stars 戰績排行榜（V1.8｜統計至 ${dateStr}）`;
+}
+
 document.querySelectorAll('#tabs button').forEach(btn => {
   btn.addEventListener('shown.bs.tab', e => {
     const type = e.target.dataset.type;
@@ -145,7 +156,7 @@ document.querySelectorAll('#tabs button').forEach(btn => {
   });
 });
 
-loadData();
+loadData().then(updateTitleDate);
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
