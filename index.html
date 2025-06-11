@@ -1,20 +1,23 @@
-
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <base href="/WingStars_Stats/">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>啦啦隊戰績排行榜（正式穩定版 V1.7）</title>
+  <title>啦啦隊戰績排行榜（V1.8）</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    body { background-color: #F9FAFB; color: #111827; }
     th { cursor: pointer; }
-    .avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; background-color: #f0f0f0; display: inline-block; }
+    .avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; background-color: #FCA5A5; display: inline-block; }
+    .nav-tabs .nav-link.active { background-color: #34D399; color: white; }
+    .table-striped>tbody>tr:nth-of-type(odd) { background-color: #F3F4F6; }
+    .btn-outline-primary { border-color: #FCA5A5; color: #FCA5A5; }
+    .btn-outline-primary:hover { background-color: #FB7185; color: white; }
   </style>
 </head>
 <body class="p-4">
-  <h1 class="mb-4">啦啦隊戰績排行榜（完整穩定版 V1.7）</h1>
+
+  <h1 class="mb-4">啦啦隊戰績排行榜（V1.8）</h1>
 
   <ul class="nav nav-tabs" id="tabs">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#home" data-type="home">主場戰績</button></li>
@@ -40,33 +43,39 @@
 
 <script>
 let fullData = {};
-
-async function loadData() {
-  const res = await fetch('./cheerleader_stats_data.json')
-  fullData = await res.json();
-  renderCards("home");
-}
-
 let sortState = {"combined": null, "home": null, "away": null};
 
+async function loadData() {
+  const res = await fetch('cheerleader_stats_data.json');
+  fullData = await res.json();
+  ['home','away','combined'].forEach(type => renderTable(type));
+}
+
 function renderTable(type) {
-  let data = [...fullData[type]];
   const container = document.getElementById(type);
-  container.innerHTML = `
-    <div class="table-responsive">
-      <table class="table table-striped table-hover align-middle">
-        <thead><tr>
-          <th>照片</th>
-          <th data-field="name">成員</th>
-          <th data-field="total">出賽數</th>
-          <th data-field="win">勝場數</th>
-          <th data-field="lose">敗場數</th>
-          <th data-field="winRate">勝率</th>
-          <th data-field="current">目前連勝/敗</th>
-          <th>出勤明細</th>
-        </tr></thead><tbody></tbody>
-      </table>
-    </div>`;
+  container.innerHTML = "";
+  let data = fullData[type];
+
+  if (!data || data.length === 0) {
+    container.innerHTML = "<div class='alert alert-secondary'>目前尚無資料</div>";
+    return;
+  }
+
+  data = [...data]; // clone array
+
+  const table = document.createElement('table');
+  table.className = "table table-striped table-hover align-middle";
+  table.innerHTML = `
+    <thead><tr>
+      <th>照片</th>
+      <th data-field="name">成員</th>
+      <th data-field="total">出賽數</th>
+      <th data-field="win">勝場數</th>
+      <th data-field="lose">敗場數</th>
+      <th data-field="winRate">勝率</th>
+      <th data-field="current">目前連勝/敗</th>
+      <th>出勤明細</th>
+    </tr></thead><tbody></tbody>`;
 
   if (sortState[type]) {
     const {field, asc} = sortState[type];
@@ -81,7 +90,7 @@ function renderTable(type) {
     });
   }
 
-  const tbody = container.querySelector('tbody');
+  const tbody = table.querySelector('tbody');
   data.forEach(item=>{
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -96,7 +105,9 @@ function renderTable(type) {
     tbody.appendChild(row);
   });
 
-  container.querySelectorAll('th[data-field]').forEach(th=>{
+  container.appendChild(table);
+
+  table.querySelectorAll('th[data-field]').forEach(th=>{
     th.onclick = ()=>{
       const field = th.dataset.field;
       if (sortState[type] && sortState[type].field === field)
@@ -126,7 +137,6 @@ function showDetail(name, type) {
   new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
 
-// 頁籤切換時重設排序
 document.querySelectorAll('#tabs button').forEach(btn => {
   btn.addEventListener('shown.bs.tab', e => {
     const type = e.target.dataset.type;
@@ -135,8 +145,9 @@ document.querySelectorAll('#tabs button').forEach(btn => {
   });
 });
 
-['home','away','combined'].forEach(renderTable);
+loadData();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body></html>
+</body>
+</html>
