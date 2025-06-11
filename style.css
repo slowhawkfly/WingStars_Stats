@@ -180,3 +180,7 @@ h1 {
 .avatar-img:hover {
   transform: scale(1.1);
 }
+
+.modal-body li.even-row {
+  background-color: #f3f4f6;
+}
