@@ -108,7 +108,7 @@ function renderChartA() {
   const ctx = document.getElementById("canvasA").getContext("2d");
   const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
   const labels = data.map(d => d.name);
-  const winRates = data.map(d => (d.winRate*100).toFixed(1)).map(parseFloat);
+  const winRates = data.map(d => +(d.winRate * 100).toFixed(1));
   const axis = calcAxisLimit(winRates);
 
   new Chart(ctx, {
@@ -135,8 +135,8 @@ function renderChartC() {
   const away = fullData['away'];
 
   const labels = combined.map(d => d.name);
-  const homeRates = home.map(d => (d.winRate*100).toFixed(1)).map(parseFloat);
-  const awayRates = away.map(d => (d.winRate*100).toFixed(1)).map(parseFloat);
+  const homeRates = home.map(d => +(d.winRate * 100).toFixed(1));
+  const awayRates = away.map(d => +(d.winRate * 100).toFixed(1));
   const allRates = homeRates.concat(awayRates);
   const axis = calcAxisLimit(allRates);
 
