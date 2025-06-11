@@ -1,9 +1,11 @@
+
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wing Stars 戰績排行榜（V1.9）</title>
+  <title>Wing Stars 戰績排行榜（V1.9.1）</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background-color: #F9FAFB; color: #111827; }
@@ -17,28 +19,26 @@
 </head>
 <body class="p-4">
 
-  <h1 class="mb-4" id="pageTitle">Wing Stars 戰績排行榜（V1.9）</h1>
+  <h1 class="mb-4" id="pageTitle">Wing Stars 戰績排行榜（V1.9.1）</h1>
 
-  <!-- 新增圖表區 -->
-  <div class="mb-5">
-    <h3>成員勝率排行榜</h3>
-    <canvas id="winRateChart" height="400"></canvas>
-  </div>
-
-  <!-- 既有頁籤 -->
   <ul class="nav nav-tabs" id="tabs">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#home" data-type="home">主場戰績</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#away" data-type="away">客場戰績</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#combined" data-type="combined">總戰績</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chart" data-type="chart">勝率圖表</button></li>
   </ul>
 
   <div class="tab-content mt-3">
     <div class="tab-pane fade show active" id="home"></div>
     <div class="tab-pane fade" id="away"></div>
     <div class="tab-pane fade" id="combined"></div>
+    <div class="tab-pane fade" id="chart">
+      <div class="mt-4">
+        <canvas id="winRateChart" height="400"></canvas>
+      </div>
+    </div>
   </div>
 
-  <!-- 出勤明細 Modal -->
   <div class="modal fade" id="detailModal" tabindex="-1">
     <div class="modal-dialog"><div class="modal-content">
       <div class="modal-header">
@@ -54,12 +54,12 @@
 let fullData = {};
 let sortState = {"combined": null, "home": null, "away": null};
 let winChart = null;
+let chartRendered = false;
 
 async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
   fullData = await res.json();
   ['home','away','combined'].forEach(type => renderTable(type));
-  renderChart(); // 畫圖表
 }
 
 function renderChart() {
@@ -73,18 +73,12 @@ function renderChart() {
     type: 'bar',
     data: {
       labels: names,
-      datasets: [{
-        label: '勝率 (%)',
-        data: rates,
-        backgroundColor: '#34D399'
-      }]
+      datasets: [{ label: '勝率 (%)', data: rates, backgroundColor: '#34D399' }]
     },
     options: {
       indexAxis: 'y',
       responsive: true,
-      scales: {
-        x: { beginAtZero: true, max: 100 }
-      }
+      scales: { x: { beginAtZero: true, max: 100 } }
     }
   });
 }
@@ -93,27 +87,19 @@ function renderTable(type) {
   const container = document.getElementById(type);
   container.innerHTML = "";
   let data = fullData[type];
-
   if (!data || data.length === 0) {
     container.innerHTML = "<div class='alert alert-secondary'>目前尚無資料</div>";
     return;
   }
-
   data = [...data];
 
   const table = document.createElement('table');
   table.className = "table table-striped table-hover align-middle";
-  table.innerHTML = `
-    <thead><tr>
-      <th>照片</th>
-      <th data-field="name">成員</th>
-      <th data-field="total">出賽數</th>
-      <th data-field="win">勝場數</th>
-      <th data-field="lose">敗場數</th>
-      <th data-field="winRate">勝率</th>
-      <th data-field="current">目前連勝/敗</th>
-      <th>出勤明細</th>
-    </tr></thead><tbody></tbody>`;
+  table.innerHTML = `<thead><tr>
+      <th>照片</th><th data-field="name">成員</th><th data-field="total">出賽數</th>
+      <th data-field="win">勝場數</th><th data-field="lose">敗場數</th>
+      <th data-field="winRate">勝率</th><th data-field="current">目前連勝/敗</th>
+      <th>出勤明細</th></tr></thead><tbody></tbody>`;
 
   if (sortState[type]) {
     const {field, asc} = sortState[type];
@@ -123,35 +109,24 @@ function renderTable(type) {
         const extract = s => s.includes('連勝') ? parseInt(s) : s.includes('連敗') ? -parseInt(s) : 0;
         valA = extract(valA); valB = extract(valB);
       }
-      if (valA === valB) return 0;
       return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
     });
   }
-
   const tbody = table.querySelector('tbody');
   data.forEach(item=>{
     const row = document.createElement('tr');
-    row.innerHTML = `
-      <td><div class="avatar-placeholder"></div></td>
-      <td>${item.name}</td>
-      <td>${item.total}</td>
-      <td>${item.win}</td>
-      <td>${item.lose}</td>
-      <td>${(item.winRate*100).toFixed(1)}%</td>
-      <td>${item.current}</td>
+    row.innerHTML = `<td><div class="avatar-placeholder"></div></td>
+      <td>${item.name}</td><td>${item.total}</td><td>${item.win}</td><td>${item.lose}</td>
+      <td>${(item.winRate*100).toFixed(1)}%</td><td>${item.current}</td>
       <td><button class='btn btn-sm btn-outline-primary' onclick='showDetail("${item.name}","${type}")'>查看</button></td>`;
     tbody.appendChild(row);
   });
-
   container.appendChild(table);
-
   table.querySelectorAll('th[data-field]').forEach(th=>{
-    th.onclick = ()=>{
-      const field = th.dataset.field;
+    th.onclick = ()=>{ const field = th.dataset.field;
       if (sortState[type] && sortState[type].field === field)
         sortState[type].asc = !sortState[type].asc;
-      else
-        sortState[type] = { field: field, asc: false };
+      else sortState[type] = { field: field, asc: false };
       renderTable(type);
     }
   });
@@ -160,16 +135,11 @@ function renderTable(type) {
 function showDetail(name, type) {
   const item = fullData[type].find(d => d.name === name);
   document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
-  const ul = document.getElementById('modalList');
-  ul.innerHTML = '';
+  const ul = document.getElementById('modalList'); ul.innerHTML = '';
   item.detail.forEach(d => {
-    const li = document.createElement('li');
-    li.className = 'list-group-item';
-    li.innerHTML = `
-      日期：${d.date}（${d.weekday_fixed}）<br>
-      地點：${d.stadium}<br>
-      結果：${d.result}　${d.opponent_fixed} ${d.opp_score} ： ${d.self_score} 啾啾
-    `;
+    const li = document.createElement('li'); li.className = 'list-group-item';
+    li.innerHTML = `日期：${d.date}（${d.weekday_fixed}）<br>地點：${d.stadium}<br>
+      結果：${d.result}　${d.opponent_fixed} ${d.opp_score} ： ${d.self_score} 啾啾`;
     ul.appendChild(li);
   });
   new bootstrap.Modal(document.getElementById('detailModal')).show();
@@ -189,14 +159,12 @@ function updateTitleDate() {
 document.querySelectorAll('#tabs button').forEach(btn => {
   btn.addEventListener('shown.bs.tab', e => {
     const type = e.target.dataset.type;
-    sortState[type] = null;
-    renderTable(type);
+    if (type === 'chart' && !chartRendered) { renderChart(); chartRendered = true; return; }
+    if (type !== 'chart') { sortState[type] = null; renderTable(type); }
   });
 });
 
 loadData().then(updateTitleDate);
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</body></html>
