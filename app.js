@@ -114,13 +114,21 @@ document.getElementById("modalClose").onclick = () => {
   document.getElementById("modal").classList.add("hidden");
 }
 
-// 新增照片放大功能：
+document.getElementById("modal").addEventListener("click", function(e) {
+  if (e.target === this) this.classList.add("hidden");
+});
+
 function showPhoto(src) {
   document.getElementById('photoModalImg').src = src;
-  document.getElementById('photoModal').classList.remove('hidden');
+  document.getElementById('photoModal').classList.remove("hidden");
 }
+
 document.getElementById("photoModalClose").onclick = () => {
   document.getElementById("photoModal").classList.add("hidden");
 }
+
+document.getElementById("photoModal").addEventListener("click", function(e) {
+  if (e.target === this) this.classList.add("hidden");
+});
 
 loadData();
