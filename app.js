@@ -1,125 +1,133 @@
 let fullData = {};
+let sortState = {"combined": null, "home": null, "away": null};
+let chartRendered = {"chartA": false, "chartC": false, "chartD": false, "attendance": false};
 
 async function loadData() {
-  const res = await fetch("cheerleader_stats_data.json");
+  const res = await fetch('cheerleader_stats_data.json');
   fullData = await res.json();
-  document.getElementById("updateDate").innerText = getUpdateDate();
-  renderAllTables();
-  renderChartA();
-  renderChartC();
-  renderChartD();
+  document.getElementById("loading").style.display = "none";
+  ['home','away','combined'].forEach(type => renderTable(type));
 }
 
-function getUpdateDate() {
-  const dates = fullData.combined.flatMap(d => d.detail.map(g => g.date));
-  const maxDate = dates.sort().slice(-1)[0];
-  return maxDate;
+function toHalfWidth(str) {
+  return str.replace(/[\uff01-\uff5e]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
 }
 
-function calcAxisLimit(dataArr) {
-  const minRaw = Math.min(...dataArr);
-  const maxRaw = Math.max(...dataArr);
-  let min = Math.floor(minRaw - 10);
-  let max = Math.ceil(maxRaw + 10);
-  if (min < 0) min = 0;
-  if (max > 100) max = 100;
-  return { min, max };
+function calcAxisLimit(values) {
+  const min = Math.max(0, Math.floor(Math.min(...values) - 10));
+  const max = Math.min(100, Math.ceil(Math.max(...values) + 10));
+  return {min, max};
 }
+function renderTable(type) {
+  const container = document.getElementById(type);
+  container.innerHTML = "";
+  let data = fullData[type];
+  if (!data || data.length === 0) {
+    container.innerHTML = "<div>目前尚無資料</div>";
+    return;
+  }
+  data = [...data];
 
-function renderAllTables() {
-  renderMainTable("homeTable", fullData.home);
-  renderMainTable("awayTable", fullData.away);
-  renderMainTable("totalTable", fullData.combined);
-  renderAttendanceTable();
-}
+  const table = document.createElement('table');
+  table.innerHTML = `<thead><tr>
+      <th>照片</th><th data-field="name">成員</th><th data-field="total">出賽數</th>
+      <th data-field="win">勝場數</th><th data-field="lose">敗場數</th>
+      <th data-field="winRate">勝率</th><th data-field="current">目前連勝/敗</th>
+      <th>出勤明細</th></tr></thead><tbody></tbody>`;
 
-function renderMainTable(tableId, data) {
-  const table = document.getElementById(tableId);
-  table.innerHTML = `
-    <tr>
-      <th>照片</th>
-      <th>成員</th>
-      <th>出賽數</th>
-      <th>目前連勝/敗</th>
-      <th>勝率</th>
-      <th>出勤明細</th>
-    </tr>`;
+  if (sortState[type]) {
+    const {field, asc} = sortState[type];
+    data.sort((a,b) => {
+      let valA = a[field], valB = b[field];
+      if (field === 'current') {
+        const extract = s => s.includes("連勝") ? parseInt(s) : s.includes("連敗") ? -parseInt(s) : 0;
+        valA = extract(valA); valB = extract(valB);
+      }
+      return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
+    });
+  }
 
-  data.forEach(d => {
-    const tr = document.createElement("tr");
-    const imgPath = `images/${d.name.replace(/\s+/g,'')}.jpg`;
-    tr.innerHTML = `
-      <td><img src="${imgPath}" class="avatar" onerror="this.src='images/default.png'"></td>
-      <td>${d.name}</td>
-      <td>${d.total}</td>
-      <td>${d.current}</td>
-      <td>${(d.winRate * 100).toFixed(1)}%</td>
-      <td><button onclick="showDetail('${d.name}','${tableId.includes('home')?'home':tableId.includes('away')?'away':'combined'}')">查看</button></td>
-    `;
-    table.appendChild(tr);
+  const tbody = table.querySelector('tbody');
+  data.forEach(item => {
+    const imageName = toHalfWidth(item.name)
+      .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '')
+      .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>
+        <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img" onclick="showPhoto('images/${imageName}.jpg')">
+      </td>
+      <td>${item.name}</td><td>${item.total}</td><td>${item.win}</td><td>${item.lose}</td>
+      <td>${(item.winRate*100).toFixed(1)}%</td><td>${item.current}</td>
+      <td><button class='view-btn' onclick='showDetail("${item.name}","${type}")'>查看</button></td>`;
+    tbody.appendChild(row);
+  });
+  container.appendChild(table);
+  table.querySelectorAll('th[data-field]').forEach(th=>{
+    th.onclick = ()=>{ const field = th.dataset.field;
+      if (sortState[type] && sortState[type].field === field)
+        sortState[type].asc = !sortState[type].asc;
+      else sortState[type] = { field: field, asc: false };
+      renderTable(type);
+    }
   });
 }
 
 function renderAttendanceTable() {
-  const table = document.getElementById("attendTable");
-  table.innerHTML = `
-    <tr>
-      <th>成員</th>
-      <th>主場</th>
-      <th>客場</th>
-      <th>總出賽</th>
-    </tr>`;
-
-  const data = fullData.combined.map(d => {
-    const homeObj = fullData.home.find(h => h.name === d.name);
-    const awayObj = fullData.away.find(a => a.name === d.name);
-    return {
-      name: d.name,
-      home: homeObj ? homeObj.total : 0,
-      away: awayObj ? awayObj.total : 0,
-      total: d.total
-    };
-  }).sort((a,b)=>b.home - a.home);
-
-  data.forEach(d => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.name}</td>
-      <td>${d.home}</td>
-      <td>${d.away}</td>
-      <td>${d.total}</td>
-    `;
-    table.appendChild(tr);
+  const container = document.getElementById('attendance');
+  const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
+  const table = document.createElement('table');
+  table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
+  const tbody = table.querySelector('tbody');
+  data.forEach(item => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${item.name}</td><td>${item.total}</td>`;
+    tbody.appendChild(row);
   });
+  container.appendChild(table);
 }
 
-function renderChartA() {
-  const ctx = document.getElementById("chartA").getContext("2d");
-  const sorted = [...fullData.combined].sort((a, b) => b.winRate - a.winRate);
-  const labels = sorted.map(d => d.name);
-  const winRates = sorted.map(d => +(d.winRate * 100).toFixed(1));
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', e => {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    e.target.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    const type = e.target.dataset.type;
+    document.getElementById(type).classList.add('active');
 
+    if (type === 'attendance' && !chartRendered.attendance) { renderAttendanceTable(); chartRendered.attendance = true; return; }
+    if (type === 'chartA' && !chartRendered.chartA) { renderChartA(); chartRendered.chartA = true; }
+    if (type === 'chartC' && !chartRendered.chartC) { renderChartC(); chartRendered.chartC = true; }
+    if (type === 'chartD' && !chartRendered.chartD) { renderChartD(); chartRendered.chartD = true; }
+    if (['home','away','combined'].includes(type)) {
+      sortState[type] = null;
+      renderTable(type);
+    }
+  });
+});
+function renderChartA() {
+  const ctx = document.getElementById("canvasA").getContext("2d");
+  const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
+  const labels = data.map(d => d.name);
+  const winRates = data.map(d => +(d.winRate * 100).toFixed(1));
   const axis = calcAxisLimit(winRates);
 
   new Chart(ctx, {
-    type: "bar",
+    type: 'bar',
     data: {
       labels: labels,
       datasets: [{
-        label: "勝率 %",
-        data: winRates,
-        backgroundColor: "rgba(0, 162, 255, 0.4)",
-        borderColor: "#00A2FF",
-        borderWidth: 1
+        label: '勝率 %',
+        data: winRates
       }]
     },
     options: {
+      responsive: true,
       indexAxis: 'y',
-      scales: {
-        x: {
-          min: axis.min,
+      scales: { 
+        x: { 
+          min: axis.min, 
           max: axis.max,
-          ticks: { stepSize: 10, callback: v => `${v}%` }
+          ticks: { stepSize: 10 }
         }
       }
     }
@@ -127,71 +135,66 @@ function renderChartA() {
 }
 
 function renderChartC() {
-  const ctx = document.getElementById("chartC").getContext("2d");
+  const ctx = document.getElementById("canvasC").getContext("2d");
+  const combined = fullData['combined'];
+  const home = fullData['home'];
+  const away = fullData['away'];
 
-  const merged = fullData.combined.map(c => {
-    const home = fullData.home.find(h => h.name === c.name);
-    const away = fullData.away.find(a => a.name === c.name);
-    return {
-      name: c.name,
-      homeRate: home ? +(home.winRate * 100).toFixed(1) : 0,
-      awayRate: away ? +(away.winRate * 100).toFixed(1) : 0
-    };
-  }).sort((a,b) => b.homeRate - a.homeRate);
-
-  const labels = merged.map(d => d.name);
-  const homeRates = merged.map(d => d.homeRate);
-  const awayRates = merged.map(d => d.awayRate);
-
-  const axis = calcAxisLimit([...homeRates, ...awayRates]);
+  const labels = combined.map(d => d.name);
+  const homeRates = home.map(d => +(d.winRate * 100).toFixed(1));
+  const awayRates = away.map(d => +(d.winRate * 100).toFixed(1));
+  const allRates = homeRates.concat(awayRates);
+  const axis = calcAxisLimit(allRates);
 
   new Chart(ctx, {
-    type: "bar",
+    type: 'bar',
     data: {
       labels: labels,
       datasets: [
-        { label: "主場勝率", data: homeRates, backgroundColor: "rgba(0, 162, 255, 0.4)" },
-        { label: "客場勝率", data: awayRates, backgroundColor: "rgba(255, 99, 132, 0.4)" }
+        { label: '主場勝率', data: homeRates, backgroundColor:'#99ccff' },
+        { label: '客場勝率', data: awayRates, backgroundColor:'#ff99cc' }
       ]
     },
     options: {
+      responsive: true,
       indexAxis: 'y',
-      scales: {
-        x: {
-          min: axis.min,
+      scales: { 
+        x: { 
+          min: axis.min, 
           max: axis.max,
-          ticks: { stepSize: 10, callback: v => `${v}%` }
+          ticks: { stepSize: 10 }
         }
       }
     }
   });
 }
-
 function renderChartD() {
-  const ctx = document.getElementById("chartD").getContext("2d");
+  const ctx = document.getElementById("canvasD").getContext("2d");
+  let data = [...fullData['combined']];
 
-  const data = fullData.combined.map(d => {
-    let streak = 0;
-    if (d.current.includes("連勝")) streak = parseInt(d.current);
-    if (d.current.includes("連敗")) streak = -parseInt(d.current);
-    return { name: d.name, streak: streak };
-  }).sort((a, b) => b.streak - a.streak);
+  data = data.map(d => {
+    let val = 0;
+    if (d.current.includes("連勝")) val = parseInt(d.current);
+    if (d.current.includes("連敗")) val = -parseInt(d.current);
+    return {...d, streakVal: val};
+  }).sort((a,b)=>b.streakVal-a.streakVal);
 
   const labels = data.map(d => d.name);
-  const streaks = data.map(d => d.streak);
-  const colors = streaks.map(v => v < 0 ? "#FF6666" : "#3399FF");
+  const streaks = data.map(d => d.streakVal);
+  const colors = streaks.map(v => v < 0 ? "#ff7777" : "#77b5ff");
 
   new Chart(ctx, {
-    type: "bar",
+    type: 'bar',
     data: {
       labels: labels,
       datasets: [{
-        label: "目前連勝/連敗",
+        label: '目前連勝/連敗',
         data: streaks,
         backgroundColor: colors
       }]
     },
     options: {
+      responsive: true,
       indexAxis: 'y'
     }
   });
@@ -200,10 +203,10 @@ function renderChartD() {
 function showDetail(name, type) {
   const item = fullData[type].find(d => d.name === name);
   document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
-  const ul = document.getElementById('modalList');
+  const ul = document.getElementById('modalList'); 
   ul.innerHTML = '';
 
-  item.detail.forEach((d) => {
+  item.detail.forEach((d, idx) => {
     const li = document.createElement('li');
     li.innerHTML = `
       <span>${d.date}（${d.weekday_fixed}）</span>
