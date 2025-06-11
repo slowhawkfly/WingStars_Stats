@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wing Stars 戰績排行榜（V4.1 美化版）</title>
+  <title>Wing Stars 戰績排行榜（V4.1 完整穩定版）</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,7 +11,7 @@
 
   <div id="loading">資料載入中...</div>
 
-  <h1 id="pageTitle">Wing Stars 戰績排行榜（V4.1 美化版）</h1>
+  <h1 id="pageTitle">Wing Stars 戰績排行榜（V4.1 完整穩定版）</h1>
 
   <div class="card">
     <ul class="nav nav-tabs flex-wrap" id="tabs">
@@ -59,6 +59,98 @@ async function loadData() {
   fullData = await res.json();
   document.getElementById("loading").style.display = "none";
   ['home','away','combined'].forEach(type => renderTable(type));
+}
+function renderTable(type) {
+  const container = document.getElementById(type);
+  container.innerHTML = "";
+  let data = fullData[type];
+  if (!data || data.length === 0) {
+    container.innerHTML = "<div class='alert alert-secondary'>目前尚無資料</div>";
+    return;
+  }
+  data = [...data];
+
+  const table = document.createElement('table');
+  table.className = "table align-middle";
+  table.innerHTML = `<thead><tr>
+      <th>照片</th><th data-field="name">成員</th><th data-field="total">出賽數</th>
+      <th data-field="win">勝場數</th><th data-field="lose">敗場數</th>
+      <th data-field="winRate">勝率</th><th data-field="current">目前連勝/敗</th>
+      <th>出勤明細</th></tr></thead><tbody></tbody>`;
+
+  if (sortState[type]) {
+    const {field, asc} = sortState[type];
+    data.sort((a,b) => {
+      let valA = a[field], valB = b[field];
+      if (field === 'current') {
+        const extract = s => s.includes('連勝') ? parseInt(s) : s.includes('連敗') ? -parseInt(s) : 0;
+        valA = extract(valA); valB = extract(valB);
+      }
+      return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
+    });
+  }
+  const tbody = table.querySelector('tbody');
+  data.forEach(item=>{
+    const row = document.createElement('tr');
+    row.innerHTML = `<td><div class="avatar-placeholder"></div></td>
+      <td>${item.name}</td><td>${item.total}</td><td>${item.win}</td><td>${item.lose}</td>
+      <td>${(item.winRate*100).toFixed(1)}%</td><td>${item.current}</td>
+      <td><button class='btn btn-sm btn-outline-primary' onclick='showDetail("${item.name}","${type}")'>查看</button></td>`;
+    tbody.appendChild(row);
+  });
+  container.appendChild(table);
+  table.querySelectorAll('th[data-field]').forEach(th=>{
+    th.onclick = ()=>{ const field = th.dataset.field;
+      if (sortState[type] && sortState[type].field === field)
+        sortState[type].asc = !sortState[type].asc;
+      else sortState[type] = { field: field, asc: false };
+      renderTable(type);
+    }
+  });
+}
+
+function renderAttendanceTable() {
+  const container = document.getElementById('attendance');
+  const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
+  const table = document.createElement('table');
+  table.className = "table align-middle";
+  table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
+  const tbody = table.querySelector('tbody');
+  data.forEach(item => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${item.name}</td><td>${item.total}</td>`;
+    tbody.appendChild(row);
+  });
+  container.appendChild(table);
+}
+
+function renderChartA() {
+  const data = [...fullData['combined']].sort((a,b)=>b.winRate - a.winRate);
+  const names = data.map(d => d.name);
+  const rates = data.map(d => (d.winRate*100).toFixed(1));
+  new Chart(document.getElementById('canvasA'), {
+    type: 'bar',
+    data: { labels: names, datasets: [{ label: '勝率 (%)', data: rates, backgroundColor: '#34D399' }] },
+    options: { responsive: true, indexAxis: 'x', animation: {duration: 800}, scales: { y: { beginAtZero: true, max: 100 } } }
+  });
+}
+
+function renderChartC() {
+  const homeData = fullData['home'] || [];
+  const awayData = fullData['away'] || [];
+  const names = [...new Set([...homeData, ...awayData].map(d => d.name))];
+  const homeMap = Object.fromEntries(homeData.map(d => [d.name, d.winRate*100]));
+  const awayMap = Object.fromEntries(awayData.map(d => [d.name, d.winRate*100]));
+  const homeRates = names.map(n => homeMap[n] || 0);
+  const awayRates = names.map(n => awayMap[n] || 0);
+  new Chart(document.getElementById('canvasC'), {
+    type: 'bar',
+    data: { labels: names, datasets: [
+      { label: '主場勝率', data: homeRates, backgroundColor: '#60A5FA' },
+      { label: '客場勝率', data: awayRates, backgroundColor: '#FBBF24' }
+    ] },
+    options: { responsive: true, indexAxis: 'x', animation: {duration: 800}, scales: { y: { beginAtZero: true, max: 100 } } }
+  });
 }
 function renderChartD() {
   const data = [...fullData['combined']].map(d => ({
