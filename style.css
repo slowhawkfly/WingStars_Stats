@@ -1,81 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600&display=swap');
 
 body {
-  background-color: #f5f7fa;
+  background: linear-gradient(to bottom, #f9fafb, #f1f5f9);
   color: #1f2937;
-  font-family: 'Noto Sans TC', sans-serif;
+  font-family: 'Inter', 'Noto Sans TC', sans-serif;
   line-height: 1.6;
+  padding-bottom: 60px;
 }
 
 h1 {
   font-weight: 600;
-  color: #16a34a;
+  color: #10b981;
   margin-bottom: 1rem;
-  font-size: 2rem;
+  font-size: 2.2rem;
+}
+
+.header-bar {
+  background: linear-gradient(90deg, #10b981, #fb7185);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 32px;
+  font-size: 1.6rem;
+  letter-spacing: 1px;
 }
 
 .nav-tabs .nav-link.active {
-  background-color: #16a34a;
+  background: #10b981;
   color: #fff;
-  border: none;
-  border-radius: 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 .nav-tabs .nav-link {
   border: none;
-  color: #4b5563;
-  transition: 0.2s;
+  color: #374151;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .nav-tabs .nav-link:hover {
-  color: #16a34a;
-  background-color: #e2e8f0;
+  color: #10b981;
+  background-color: #e0f2f1;
 }
 
 .card {
   background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  padding: 25px;
-  margin-bottom: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  padding: 32px;
+  margin-bottom: 32px;
   transition: all 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
 }
 
 .table {
   border-collapse: separate;
-  border-spacing: 0 10px;
+  border-spacing: 0 12px;
   width: 100%;
-  min-width: 600px;
-  table-layout: auto;
+  min-width: 700px;
 }
 
 .table thead th {
-  background: #f1f5f9;
+  background: #f3f4f6;
   color: #374151;
   font-weight: 600;
   border-bottom: none;
+  padding: 16px;
+  border-radius: 12px 12px 0 0;
 }
 
 .table tbody td {
-  background: #fff;
+  background: #ffffff;
   border-top: none;
   vertical-align: middle;
+  padding: 16px;
+  border-radius: 12px;
+  transition: box-shadow 0.3s;
 }
 
 .table tbody tr:hover td {
-  background: #f9fafb;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 .avatar-placeholder {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background-color: #fb7185;
+  background: linear-gradient(135deg, #10b981, #fb7185);
   display: inline-block;
 }
 
@@ -83,26 +102,26 @@ h1 {
   border-color: #fb7185;
   color: #fb7185;
   font-weight: 600;
-  border-radius: 20px;
-  padding: 4px 16px;
+  border-radius: 999px;
+  padding: 6px 20px;
   transition: 0.3s;
 }
 
 .btn-outline-primary:hover {
-  background-color: #fb7185;
+  background: #fb7185;
   color: #fff;
 }
 
 #loading {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(255,255,255,0.85);
+  background-color: rgba(255,255,255,0.9);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  color: #16a34a;
+  font-size: 1.8rem;
+  color: #10b981;
 }
 
 .modal-body ul {
@@ -113,9 +132,9 @@ h1 {
 .modal-body li {
   border: none;
   background: #f9fafb;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   border-radius: 10px;
-  padding: 10px 15px;
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   font-size: 0.95rem;
@@ -123,16 +142,16 @@ h1 {
 
 .modal-body li span {
   white-space: nowrap;
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 #canvasHeatmap {
   margin-top: 30px;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #fff;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
 .tab-pane {
