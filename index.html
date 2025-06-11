@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wing Stars 戰績系統 V7.1</title>
+  <title>Wing Stars 戰績系統 V7.1.1</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -35,11 +35,20 @@
   <div id="heatmap" class="tab-content"><canvas id="canvasHeatmap"></canvas></div>
 </main>
 
+<!-- 出勤明細 Modal -->
 <div id="modal" class="modal hidden">
   <div class="modal-content">
     <span class="modal-close" id="modalClose">&times;</span>
     <h2 id="modalName"></h2>
     <ul id="modalList"></ul>
+  </div>
+</div>
+
+<!-- 照片放大 Modal -->
+<div id="photoModal" class="modal hidden">
+  <div class="photo-modal-content">
+    <span class="modal-close" id="photoModalClose">&times;</span>
+    <img id="photoModalImg" src="" alt="Photo" />
   </div>
 </div>
 
