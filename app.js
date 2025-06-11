@@ -100,50 +100,13 @@ document.querySelectorAll('.tab').forEach(btn => {
   });
 });
 
-function showDetail(name, type) {
-  const item = fullData[type].find(d => d.name === name);
-  document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
-  const ul = document.getElementById('modalList'); 
-  ul.innerHTML = '';
-
-  item.detail.forEach((d, idx) => {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <span>${d.date}（${d.weekday_fixed}）</span>
-      <span>${d.stadium}</span>
-      <span>${d.opponent_fixed} ${d.opp_score}：${d.self_score} 啾啾</span>
-      <span>${d.result}</span>`;
-    ul.appendChild(li);
-  });
-
-  document.getElementById("modal").classList.remove("hidden");
-}
-
-document.getElementById("modalClose").onclick = () => {
-  document.getElementById("modal").classList.add("hidden");
-};
-
-document.getElementById("modal").addEventListener("click", function(e) {
-  if (e.target === e.currentTarget) this.classList.add("hidden");
-});
-
-function showPhoto(src) {
-  document.getElementById('photoModalImg').src = src;
-  document.getElementById('photoModal').classList.remove("hidden");
-}
-
-document.getElementById("photoModalClose").onclick = () => {
-  document.getElementById("photoModal").classList.add("hidden");
-};
-
-document.getElementById("photoModal").addEventListener("click", function(e) {
-  if (e.target === e.currentTarget) this.classList.add("hidden");
-});
 function renderChartA() {
   const ctx = document.getElementById("canvasA").getContext("2d");
   const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
   const labels = data.map(d => d.name);
   const winRates = data.map(d => (d.winRate*100).toFixed(1));
+  const minRate = Math.min(...winRates);
+  const minValue = Math.max(0, minRate - 10);
 
   new Chart(ctx, {
     type: 'bar',
@@ -156,7 +119,8 @@ function renderChartA() {
     },
     options: {
       responsive: true,
-      indexAxis: 'y'
+      indexAxis: 'y',
+      scales: { x: { min: minValue, max: 100 } }
     }
   });
 }
@@ -170,33 +134,40 @@ function renderChartC() {
   const labels = combined.map(d => d.name);
   const homeRates = home.map(d => (d.winRate*100).toFixed(1));
   const awayRates = away.map(d => (d.winRate*100).toFixed(1));
+  const minAll = Math.min(...homeRates.concat(awayRates));
+  const minValue = Math.max(0, minAll - 10);
 
   new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
       datasets: [
-        { label: '主場勝率', data: homeRates },
-        { label: '客場勝率', data: awayRates }
+        { label: '主場勝率', data: homeRates, backgroundColor:'#99ccff' },
+        { label: '客場勝率', data: awayRates, backgroundColor:'#ff99cc' }
       ]
     },
     options: {
       responsive: true,
-      indexAxis: 'y'
+      indexAxis: 'y',
+      scales: { x: { min: minValue, max: 100 } }
     }
   });
 }
 
 function renderChartD() {
   const ctx = document.getElementById("canvasD").getContext("2d");
-  const data = [...fullData['combined']];
+  let data = [...fullData['combined']];
+
+  data = data.map(d => {
+    let val = 0;
+    if (d.current.includes("連勝")) val = parseInt(d.current);
+    if (d.current.includes("連敗")) val = -parseInt(d.current);
+    return {...d, streakVal: val};
+  }).sort((a,b)=>b.streakVal-a.streakVal);
 
   const labels = data.map(d => d.name);
-  const streaks = data.map(d => {
-    if (d.current.includes("連勝")) return parseInt(d.current);
-    if (d.current.includes("連敗")) return -parseInt(d.current);
-    return 0;
-  });
+  const streaks = data.map(d => d.streakVal);
+  const colors = streaks.map(v => v < 0 ? "#ff7777" : "#77b5ff");
 
   new Chart(ctx, {
     type: 'bar',
@@ -204,7 +175,8 @@ function renderChartD() {
       labels: labels,
       datasets: [{
         label: '目前連勝/連敗',
-        data: streaks
+        data: streaks,
+        backgroundColor: colors
       }]
     },
     options: {
@@ -213,17 +185,20 @@ function renderChartD() {
     }
   });
 }
-
 function renderHeatmap() {
   const ctx = document.getElementById("canvasHeatmap").getContext("2d");
   const members = [...fullData['combined']];
-  const games = [...new Set(members.flatMap(m => m.detail.map(d => d.date)))].sort();
-  const dataMatrix = [];
+  const allDates = [...new Set(members.flatMap(m => m.detail.map(d => d.date)))].sort();
+
+  const memberLabels = members.map(m => m.name);
+  const dateLabels = allDates;
+
+  const matrixData = [];
 
   members.forEach((m, mi) => {
-    games.forEach((g, gi) => {
-      const played = m.detail.some(d => d.date === g) ? 1 : 0;
-      dataMatrix.push({x: gi, y: mi, v: played});
+    dateLabels.forEach((d, di) => {
+      const played = m.detail.some(item => item.date === d) ? 1 : 0;
+      matrixData.push({x: di, y: mi, v: played});
     });
   });
 
@@ -232,22 +207,29 @@ function renderHeatmap() {
     data: {
       datasets: [{
         label: '出勤熱力圖',
-        data: dataMatrix,
-        backgroundColor(ctx) {
+        data: matrixData,
+        backgroundColor: ctx => {
           const value = ctx.dataset.data[ctx.dataIndex].v;
-          return value ? '#ff7eb3' : '#eee';
+          return value ? '#ff99cc' : '#f0f0f0';
         },
         width: 20,
         height: 20
       }]
     },
     options: {
+      responsive: true,
       scales: {
-        x: { type: 'category', labels: games },
-        y: { type: 'category', labels: members.map(m => m.name) }
+        x: {
+          type: 'category',
+          labels: dateLabels,
+          title: { display: true, text: '日期' }
+        },
+        y: {
+          type: 'category',
+          labels: memberLabels,
+          title: { display: true, text: '成員' }
+        }
       }
     }
   });
 }
-
-loadData();
