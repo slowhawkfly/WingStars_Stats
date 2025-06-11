@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wing Stars 戰績排行榜（V6.0 設計系統版）</title>
+  <title>Wing Stars 戰績排行榜（V6.0 圖像版）</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -13,7 +13,7 @@
 
   <div id="loading">資料載入中...</div>
 
-  <h1 id="pageTitle">Wing Stars 戰績排行榜（V6.0 設計系統版）</h1>
+  <h1 id="pageTitle">Wing Stars 戰績排行榜（V6.0 圖像版）</h1>
 
   <div class="card">
     <ul class="nav nav-tabs flex-wrap justify-content-center" id="tabs">
@@ -62,97 +62,69 @@ async function loadData() {
   document.getElementById("loading").style.display = "none";
   ['home','away','combined'].forEach(type => renderTable(type));
 }
-function renderTable(type) {
-  const container = document.getElementById(type);
-  container.innerHTML = "";
-  let data = fullData[type];
-  if (!data || data.length === 0) {
-    container.innerHTML = "<div class='alert alert-secondary'>目前尚無資料</div>";
-    return;
-  }
-  data = [...data];
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wing Stars 戰績排行榜（V6.0 圖像版）</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="p-4">
 
-  const table = document.createElement('table');
-  table.className = "table align-middle";
-  table.innerHTML = `<thead><tr>
-      <th>照片</th><th data-field="name">成員</th><th data-field="total">出賽數</th>
-      <th data-field="win">勝場數</th><th data-field="lose">敗場數</th>
-      <th data-field="winRate">勝率</th><th data-field="current">目前連勝/敗</th>
-      <th>出勤明細</th></tr></thead><tbody></tbody>`;
+  <div class="header-bar">Wing Stars 戰績分析系統</div>
 
-  if (sortState[type]) {
-    const {field, asc} = sortState[type];
-    data.sort((a,b) => {
-      let valA = a[field], valB = b[field];
-      if (field === 'current') {
-        const extract = s => s.includes('連勝') ? parseInt(s) : s.includes('連敗') ? -parseInt(s) : 0;
-        valA = extract(valA); valB = extract(valB);
-      }
-      return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
-    });
-  }
-  const tbody = table.querySelector('tbody');
-  data.forEach(item=>{
-    const row = document.createElement('tr');
-    row.innerHTML = `<td><div class="avatar-placeholder"></div></td>
-      <td>${item.name}</td><td>${item.total}</td><td>${item.win}</td><td>${item.lose}</td>
-      <td>${(item.winRate*100).toFixed(1)}%</td><td>${item.current}</td>
-      <td><button class='btn btn-sm btn-outline-primary' onclick='showDetail("${item.name}","${type}")'>查看</button></td>`;
-    tbody.appendChild(row);
-  });
-  container.appendChild(table);
-  table.querySelectorAll('th[data-field]').forEach(th=>{
-    th.onclick = ()=>{ const field = th.dataset.field;
-      if (sortState[type] && sortState[type].field === field)
-        sortState[type].asc = !sortState[type].asc;
-      else sortState[type] = { field: field, asc: false };
-      renderTable(type);
-    }
-  });
-}
+  <div id="loading">資料載入中...</div>
 
-function renderAttendanceTable() {
-  const container = document.getElementById('attendance');
-  const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
-  const table = document.createElement('table');
-  table.className = "table align-middle";
-  table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
-  const tbody = table.querySelector('tbody');
-  data.forEach(item => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${item.name}</td><td>${item.total}</td>`;
-    tbody.appendChild(row);
-  });
-  container.appendChild(table);
-}
+  <h1 id="pageTitle">Wing Stars 戰績排行榜（V6.0 圖像版）</h1>
 
-function renderChartA() {
-  const data = [...fullData['combined']].sort((a,b)=>b.winRate - a.winRate);
-  const names = data.map(d => d.name);
-  const rates = data.map(d => (d.winRate*100).toFixed(1));
-  new Chart(document.getElementById('canvasA'), {
-    type: 'bar',
-    data: { labels: names, datasets: [{ label: '勝率 (%)', data: rates, backgroundColor: '#34D399' }] },
-    options: { responsive: true, indexAxis: 'x', animation: {duration: 800}, scales: { y: { beginAtZero: true, max: 100 } } }
-  });
-}
+  <div class="card">
+    <ul class="nav nav-tabs flex-wrap justify-content-center" id="tabs">
+      <li class="nav-item mb-2"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#home" data-type="home">主場戰績</button></li>
+      <li class="nav-item mb-2"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#away" data-type="away">客場戰績</button></li>
+      <li class="nav-item mb-2"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#combined" data-type="combined">總戰績</button></li>
+      <li class="nav-item mb-2"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#attendance" data-type="attendance">出勤場次排行榜</button></li>
+      <li class="nav-item mb-2"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartA" data-type="chartA">勝率排行榜</button></li>
+      <li class="nav-item mb-2"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartC" data-type="chartC">主客場勝率比較</button></li>
+      <li class="nav-item mb-2"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#chartD" data-type="chartD">連勝連敗排行榜</button></li>
+      <li class="nav-item mb-2"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#heatmap" data-type="heatmap">出勤熱力圖</button></li>
+    </ul>
+  </div>
 
-function renderChartC() {
-  const homeData = fullData['home'] || [];
-  const awayData = fullData['away'] || [];
-  const names = [...new Set([...homeData, ...awayData].map(d => d.name))];
-  const homeMap = Object.fromEntries(homeData.map(d => [d.name, d.winRate*100]));
-  const awayMap = Object.fromEntries(awayData.map(d => [d.name, d.winRate*100]));
-  const homeRates = names.map(n => homeMap[n] || 0);
-  const awayRates = names.map(n => awayMap[n] || 0);
-  new Chart(document.getElementById('canvasC'), {
-    type: 'bar',
-    data: { labels: names, datasets: [
-      { label: '主場勝率', data: homeRates, backgroundColor: '#60A5FA' },
-      { label: '客場勝率', data: awayRates, backgroundColor: '#FBBF24' }
-    ] },
-    options: { responsive: true, indexAxis: 'x', animation: {duration: 800}, scales: { y: { beginAtZero: true, max: 100 } } }
-  });
+  <div class="tab-content mt-3">
+    <div class="tab-pane fade show active" id="home"></div>
+    <div class="tab-pane fade" id="away"></div>
+    <div class="tab-pane fade" id="combined"></div>
+    <div class="tab-pane fade" id="attendance"></div>
+    <div class="tab-pane fade" id="chartA"><canvas id="canvasA" height="400"></canvas></div>
+    <div class="tab-pane fade" id="chartC"><canvas id="canvasC" height="400"></canvas></div>
+    <div class="tab-pane fade" id="chartD"><canvas id="canvasD" height="400"></canvas></div>
+    <div class="tab-pane fade" id="heatmap"><canvas id="canvasHeatmap" height="600"></canvas></div>
+  </div>
+
+  <div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalName">出勤明細</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body"><ul id="modalList" class="list-group"></ul></div>
+    </div></div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@4.1.0/dist/chartjs-chart-matrix.min.js"></script>
+<script>
+let fullData = {};
+let sortState = {"combined": null, "home": null, "away": null};
+let chartRendered = {"chartA": false, "chartC": false, "chartD": false, "attendance": false, "heatmap": false};
+
+async function loadData() {
+  const res = await fetch('cheerleader_stats_data.json');
+  fullData = await res.json();
+  document.getElementById("loading").style.display = "none";
+  ['home','away','combined'].forEach(type => renderTable(type));
 }
 function renderChartD() {
   const data = [...fullData['combined']].map(d => ({
