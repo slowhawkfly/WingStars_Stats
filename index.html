@@ -1,7 +1,9 @@
 
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+  <base href="/WingStars_Stats/">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>啦啦隊戰績排行榜（正式穩定版 V1.7）</title>
@@ -40,7 +42,7 @@
 let fullData = {};
 
 async function loadData() {
-  const res = await fetch('cheerleader_stats_data.json');
+  const res = await fetch('./cheerleader_stats_data.json');
   fullData = await res.json();
   renderCards("home");
 }
