@@ -1,120 +1,109 @@
 let fullData = {};
-let chartRendered = {"home": false, "away": false, "combined": false, "attendance": false, "winrate": false, "homeaway": false, "streak": false};
 
 async function loadData() {
-  const res = await fetch("cheerleader_stats_data.json");
+  const res = await fetch('./cheerleader_stats_data.json');
   fullData = await res.json();
-  document.getElementById("loading").style.display = "none";
-  switchTab('home');
+
+  updateDate(fullData.date);
+  renderMainTable("home");
+  renderAttendanceChart();
+  renderWinRateChart();
+  renderHomeAwayChart();
+  renderStreakChart();
 }
 
-function calcAxisLimit(values) {
-  const min = Math.max(0, Math.floor(Math.min(...values) - 10));
-  const max = Math.min(100, Math.ceil(Math.max(...values) + 10));
-  return {min, max};
+function updateDate(dateStr) {
+  document.getElementById("titleDate").innerText = `（截至 ${dateStr}）`;
 }
+function renderMainTable(tab) {
+  const tbody = document.querySelector("#mainTable tbody");
+  tbody.innerHTML = "";
 
-function toStreakValue(currentStr) {
-  if (currentStr.includes("連勝")) return parseInt(currentStr);
-  if (currentStr.includes("連敗")) return -parseInt(currentStr);
-  return 0;
-}
+  let data = [];
+  if (tab === "home") data = fullData.home;
+  else if (tab === "away") data = fullData.away;
+  else data = fullData.combined;
 
-function switchTab(type) {
-  const main = document.getElementById("mainContent");
-  main.innerHTML = "";
-
-  if (type === "home" || type === "away" || type === "total") {
-    renderMainTable(type);
-  }
-  if (type === "attendance") {
-    renderAttendanceTable();
-  }
-  if (type === "winrate") {
-    renderChartA();
-  }
-  if (type === "homeaway") {
-    renderChartC();
-  }
-  if (type === "streak") {
-    renderChartD();
-  }
-}
-function renderMainTable(type) {
-  const data = (type === 'home') ? fullData.home :
-               (type === 'away') ? fullData.away :
-               fullData.combined;
-
-  const table = document.createElement("table");
-  table.innerHTML = `
-    <tr>
-      <th>照片</th>
-      <th>成員</th>
-      <th>出賽數</th>
-      <th>目前連勝/敗</th>
-      <th>勝率</th>
-      <th>出勤明細</th>
-    </tr>`;
-
-  data.forEach(d => {
+  data.forEach(player => {
     const tr = document.createElement("tr");
-    const imageName = d.name.replace(/\s+/g, '').replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
-    const imgPath = `images/${imageName}.jpg`;
 
-    tr.innerHTML = `
-      <td><img src="${imgPath}" class="avatar" onerror="this.src='images/default.png'" onclick="showPhoto('${imgPath}')"></td>
-      <td>${d.name}</td>
-      <td>${d.total}</td>
-      <td>${d.current}</td>
-      <td>${(d.winRate * 100).toFixed(1)}%</td>
-      <td><button onclick="showDetail('${d.name}','${type}')">查看</button></td>
-    `;
-    table.appendChild(tr);
+    const imgTd = document.createElement("td");
+    const img = document.createElement("img");
+    img.src = player.photo || "./images/default.jpg";
+    img.onerror = () => { img.src = "./images/default.jpg"; };
+    img.addEventListener("click", () => showPhoto(player));
+    imgTd.appendChild(img);
+
+    const nameTd = document.createElement("td");
+    nameTd.innerText = player.name;
+
+    const gameTd = document.createElement("td");
+    gameTd.innerText = player.total;
+
+    const winTd = document.createElement("td");
+    winTd.innerText = player.win;
+
+    const loseTd = document.createElement("td");
+    loseTd.innerText = player.lose;
+
+    const streakTd = document.createElement("td");
+    streakTd.innerText = `${Math.abs(player.streak)}連${player.streak > 0 ? '勝' : player.streak < 0 ? '敗' : ''}`;
+
+    const rateTd = document.createElement("td");
+    rateTd.innerText = `${(player.winRate * 100).toFixed(1)}%`;
+
+    const btnTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.innerText = "查看";
+    btn.className = "detail-btn";
+    btn.addEventListener("click", () => showDetail(player));
+    btnTd.appendChild(btn);
+
+    tr.appendChild(imgTd);
+    tr.appendChild(nameTd);
+    tr.appendChild(gameTd);
+    tr.appendChild(winTd);
+    tr.appendChild(loseTd);
+    tr.appendChild(streakTd);
+    tr.appendChild(rateTd);
+    tr.appendChild(btnTd);
+    tbody.appendChild(tr);
   });
-
-  document.getElementById("mainContent").appendChild(table);
 }
+function renderTotalGames() {
+  const tbody = document.querySelector("#totalTable tbody");
+  tbody.innerHTML = "";
 
-function renderAttendanceTable() {
-  const table = document.createElement("table");
-  table.innerHTML = `
-    <tr>
-      <th>成員</th>
-      <th>主場</th>
-      <th>客場</th>
-      <th>總出賽</th>
-    </tr>`;
+  let list = [...fullData.combined];
+  list.sort((a, b) => (b.totalHome ?? 0) - (a.totalHome ?? 0));
 
-  const data = fullData.combined.map(d => {
-    const homeObj = fullData.home.find(h => h.name === d.name);
-    const awayObj = fullData.away.find(a => a.name === d.name);
-    return {
-      name: d.name,
-      home: homeObj ? homeObj.total : 0,
-      away: awayObj ? awayObj.total : 0,
-      total: d.total
-    };
-  }).sort((a,b)=>b.home - a.home);
-
-  data.forEach(d => {
+  list.forEach(player => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.name}</td>
-      <td>${d.home}</td>
-      <td>${d.away}</td>
-      <td>${d.total}</td>
-    `;
-    table.appendChild(tr);
+
+    const nameTd = document.createElement("td");
+    nameTd.innerText = player.name;
+
+    const homeTd = document.createElement("td");
+    homeTd.innerText = player.totalHome ?? 0;
+
+    const awayTd = document.createElement("td");
+    awayTd.innerText = player.totalAway ?? 0;
+
+    const totalTd = document.createElement("td");
+    totalTd.innerText = player.total;
+
+    tr.appendChild(nameTd);
+    tr.appendChild(homeTd);
+    tr.appendChild(awayTd);
+    tr.appendChild(totalTd);
+    tbody.appendChild(tr);
   });
-
-  document.getElementById("mainContent").appendChild(table);
 }
-function renderChartA() {
-  const ctx = createChartCanvas();
-
-  const data = [...fullData.combined].sort((a,b)=>b.winRate-a.winRate);
-  const labels = data.map(d => d.name);
-  const winRates = data.map(d => +(d.winRate * 100).toFixed(1));
+function renderWinRateChart() {
+  const ctx = document.getElementById("chartA").getContext("2d");
+  const sorted = [...fullData.combined].sort((a, b) => b.winRate - a.winRate);
+  const labels = sorted.map(d => d.name);
+  const winRates = sorted.map(d => +(d.winRate * 100).toFixed(1));
   const axis = calcAxisLimit(winRates);
 
   new Chart(ctx, {
@@ -125,7 +114,8 @@ function renderChartA() {
         label: "勝率 %",
         data: winRates,
         backgroundColor: "rgba(0, 162, 255, 0.4)",
-        borderColor: "#00A2FF"
+        borderColor: "#00A2FF",
+        borderWidth: 1
       }]
     },
     options: {
@@ -141,9 +131,8 @@ function renderChartA() {
   });
 }
 
-function renderChartC() {
-  const ctx = createChartCanvas();
-
+function renderHomeAwayChart() {
+  const ctx = document.getElementById("chartC").getContext("2d");
   const merged = fullData.combined.map(c => {
     const home = fullData.home.find(h => h.name === c.name);
     const away = fullData.away.find(a => a.name === c.name);
@@ -152,7 +141,7 @@ function renderChartC() {
       homeRate: home ? +(home.winRate * 100).toFixed(1) : 0,
       awayRate: away ? +(away.winRate * 100).toFixed(1) : 0
     };
-  }).sort((a,b) => b.homeRate - a.homeRate);
+  }).sort((a, b) => b.homeRate - a.homeRate);
 
   const labels = merged.map(d => d.name);
   const homeRates = merged.map(d => d.homeRate);
@@ -181,15 +170,14 @@ function renderChartC() {
   });
 }
 
-function renderChartD() {
-  const ctx = createChartCanvas();
-
+function renderStreakChart() {
+  const ctx = document.getElementById("chartD").getContext("2d");
   const data = fullData.combined.map(d => {
     let streak = 0;
     if (d.current.includes("連勝")) streak = parseInt(d.current);
     if (d.current.includes("連敗")) streak = -parseInt(d.current);
     return { name: d.name, streak: streak };
-  }).sort((a,b)=>b.streak-a.streak);
+  }).sort((a, b) => b.streak - a.streak);
 
   const labels = data.map(d => d.name);
   const streaks = data.map(d => d.streak);
@@ -210,25 +198,12 @@ function renderChartD() {
     }
   });
 }
-
-function createChartCanvas() {
-  const main = document.getElementById("mainContent");
-  main.innerHTML = "";
-  const canvas = document.createElement("canvas");
-  main.appendChild(canvas);
-  return canvas.getContext("2d");
-}
-function showDetail(name, type) {
-  const source = type === "home" ? fullData.home :
-                 type === "away" ? fullData.away :
-                 fullData.combined;
-
-  const item = source.find(d => d.name === name);
+function showDetail(player) {
   const modal = document.getElementById("detailModal");
   const content = document.getElementById("modalContent");
-  content.innerHTML = `<h2>${item.name} 出勤明細</h2>`;
+  content.innerHTML = `<h2>${player.name} 出勤明細</h2>`;
 
-  item.detail.forEach(d => {
+  player.detail.forEach(d => {
     const row = document.createElement("div");
     row.className = "detail-row";
     row.innerHTML = `
@@ -242,20 +217,21 @@ function showDetail(name, type) {
   modal.classList.remove("hidden");
 }
 
-function showPhoto(src) {
+function showPhoto(player) {
   const modal = document.getElementById("photoModal");
-  const img = document.getElementById("modalImage");
-  img.src = src;
+  const modalImg = document.getElementById("modalImage");
+  const imgPath = `images/${player.name.replace(/\s/g, '').replace(/[^\w]/g, '')}.jpg`;
+  modalImg.src = imgPath;
   modal.classList.remove("hidden");
 }
-
-document.getElementById("detailModal").addEventListener("click", function(e) {
-  if (e.target === e.currentTarget) this.classList.add("hidden");
-});
 
 document.getElementById("photoModal").addEventListener("click", function(e) {
   if (e.target === e.currentTarget) this.classList.add("hidden");
 });
 
-// 非常關鍵！loadData() 正確啟動點
+document.getElementById("detailModal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
+});
+
+// 啟動點
 loadData();
