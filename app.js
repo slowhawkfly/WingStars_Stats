@@ -43,7 +43,7 @@ function renderTable(type) {
     const imageName = item.name.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z]/g, '');
     const row = document.createElement('tr');
     row.innerHTML = `<td>
-        <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img">
+        <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img" onclick="showPhoto('images/${imageName}.jpg')">
       </td>
       <td>${item.name}</td><td>${item.total}</td><td>${item.win}</td><td>${item.lose}</td>
       <td>${(item.winRate*100).toFixed(1)}%</td><td>${item.current}</td>
@@ -75,7 +75,6 @@ function renderAttendanceTable() {
   container.appendChild(table);
 }
 
-// 簡化版 - 這裡先只完整保留核心 tab 切換和明細
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', e => {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -113,6 +112,15 @@ function showDetail(name, type) {
 
 document.getElementById("modalClose").onclick = () => {
   document.getElementById("modal").classList.add("hidden");
+}
+
+// 新增照片放大功能：
+function showPhoto(src) {
+  document.getElementById('photoModalImg').src = src;
+  document.getElementById('photoModal').classList.remove('hidden');
+}
+document.getElementById("photoModalClose").onclick = () => {
+  document.getElementById("photoModal").classList.add("hidden");
 }
 
 loadData();
