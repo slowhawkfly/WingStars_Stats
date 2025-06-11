@@ -13,6 +13,11 @@ function toHalfWidth(str) {
   return str.replace(/[\uff01-\uff5e]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
 }
 
+function calcAxisLimit(values) {
+  const min = Math.max(0, Math.floor(Math.min(...values) - 10));
+  const max = Math.min(100, Math.ceil(Math.max(...values) + 10));
+  return {min, max};
+}
 function renderTable(type) {
   const container = document.getElementById(type);
   container.innerHTML = "";
@@ -35,7 +40,7 @@ function renderTable(type) {
     data.sort((a,b) => {
       let valA = a[field], valB = b[field];
       if (field === 'current') {
-        const extract = s => s.includes('連勝') ? parseInt(s) : s.includes('連敗') ? -parseInt(s) : 0;
+        const extract = s => s.includes("連勝") ? parseInt(s) : s.includes("連敗") ? -parseInt(s) : 0;
         valA = extract(valA); valB = extract(valB);
       }
       return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
@@ -66,6 +71,7 @@ function renderTable(type) {
     }
   });
 }
+
 function renderAttendanceTable() {
   const container = document.getElementById('attendance');
   const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
@@ -98,14 +104,12 @@ document.querySelectorAll('.tab').forEach(btn => {
     }
   });
 });
-
 function renderChartA() {
   const ctx = document.getElementById("canvasA").getContext("2d");
   const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
   const labels = data.map(d => d.name);
-  const winRates = data.map(d => (d.winRate*100).toFixed(1));
-  const minRate = Math.min(...winRates);
-  const minValue = Math.max(0, minRate - 10);
+  const winRates = data.map(d => (d.winRate*100).toFixed(1)).map(parseFloat);
+  const axis = calcAxisLimit(winRates);
 
   new Chart(ctx, {
     type: 'bar',
@@ -119,7 +123,7 @@ function renderChartA() {
     options: {
       responsive: true,
       indexAxis: 'y',
-      scales: { x: { min: minValue, max: 100 } }
+      scales: { x: { min: axis.min, max: axis.max } }
     }
   });
 }
@@ -131,10 +135,10 @@ function renderChartC() {
   const away = fullData['away'];
 
   const labels = combined.map(d => d.name);
-  const homeRates = home.map(d => (d.winRate*100).toFixed(1));
-  const awayRates = away.map(d => (d.winRate*100).toFixed(1));
-  const minAll = Math.min(...homeRates.concat(awayRates));
-  const minValue = Math.max(0, minAll - 10);
+  const homeRates = home.map(d => (d.winRate*100).toFixed(1)).map(parseFloat);
+  const awayRates = away.map(d => (d.winRate*100).toFixed(1)).map(parseFloat);
+  const allRates = homeRates.concat(awayRates);
+  const axis = calcAxisLimit(allRates);
 
   new Chart(ctx, {
     type: 'bar',
@@ -148,7 +152,7 @@ function renderChartC() {
     options: {
       responsive: true,
       indexAxis: 'y',
-      scales: { x: { min: minValue, max: 100 } }
+      scales: { x: { min: axis.min, max: axis.max } }
     }
   });
 }
