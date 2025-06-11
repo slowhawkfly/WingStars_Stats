@@ -234,15 +234,20 @@ function renderHeatmap() {
 function showDetail(name, type) {
   const item = fullData[type].find(d => d.name === name);
   document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
-  const ul = document.getElementById('modalList'); ul.innerHTML = '';
-  item.detail.forEach(d => {
+  const ul = document.getElementById('modalList'); 
+  ul.innerHTML = '';
+
+  item.detail.forEach((d, idx) => {
     const li = document.createElement('li');
     li.innerHTML = `
       <span>${d.date}（${d.weekday_fixed}）</span>
       <span>${d.stadium}</span>
-      <span>${d.result} ${d.opponent_fixed} ${d.opp_score}：${d.self_score} 啾啾</span>`;
+      <span>${d.opponent_fixed} ${d.opp_score}：${d.self_score} 啾啾</span>
+      <span>${d.result}</span>`;
+    if (idx % 2 === 0) li.classList.add('even-row');
     ul.appendChild(li);
   });
+
   new bootstrap.Modal(document.getElementById('detailModal')).show();
 }
 
