@@ -3,7 +3,7 @@
 :root {
   --pink: #e43f84;
   --pink-light: #fce8f0;
-  --gold: #d4b15f; /* 降低飽和度的柔和金色，僅作點綴 */
+  --gold: #d4b15f;
   --bg: #fff7f9;
   --card-bg: #fff;
   --gray: #f3e5e9;
@@ -116,6 +116,7 @@ tbody tr:hover td {
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
 }
 
 button.view-btn {
@@ -146,15 +147,17 @@ button.view-btn:hover {
   color: var(--pink);
 }
 
-/* Modal 設計 */
+/* 主出勤明細 Modal */
 .modal {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.4);
+  z-index: 9999;
+  overflow-y: auto;
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 9999;
+  align-items: flex-start;
+  padding: 2rem 0;
 }
 
 .modal.hidden {
@@ -168,9 +171,6 @@ button.view-btn:hover {
   box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   width: 90%;
   max-width: 600px;
-  position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
 }
 
 .modal-content h2 {
@@ -205,6 +205,22 @@ button.view-btn:hover {
   font-size: 1.8rem;
   color: #999;
   cursor: pointer;
+}
+
+/* 照片放大 Modal */
+.photo-modal-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.photo-modal-content img {
+  max-width: 100%;
+  border-radius: 1rem;
 }
 
 canvas {
