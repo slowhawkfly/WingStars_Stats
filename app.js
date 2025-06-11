@@ -9,6 +9,10 @@ async function loadData() {
   ['home','away','combined'].forEach(type => renderTable(type));
 }
 
+function toHalfWidth(str) {
+  return str.replace(/[\uff01-\uff5e]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+}
+
 function renderTable(type) {
   const container = document.getElementById(type);
   container.innerHTML = "";
@@ -40,7 +44,9 @@ function renderTable(type) {
 
   const tbody = table.querySelector('tbody');
   data.forEach(item => {
-    const imageName = item.name.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z]/g, '');
+    const imageName = toHalfWidth(item.name)
+      .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '')
+      .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
     const row = document.createElement('tr');
     row.innerHTML = `<td>
         <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img" onclick="showPhoto('images/${imageName}.jpg')">
