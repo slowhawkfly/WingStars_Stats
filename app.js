@@ -115,7 +115,8 @@ function renderCardTable(container, data, type) {
   });
 }
 function renderAttendanceTable() {
-  const container = document.getElementById('attendance');
+  const container = document.querySelector('#attendance .table-container');
+  container.innerHTML = "";
   const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
   const table = document.createElement('table');
   table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
