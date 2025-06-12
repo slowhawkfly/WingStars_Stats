@@ -1,15 +1,12 @@
 let fullData = {};
-let sortState = {"combined": null, "home": null, "away": null};
-let chartRendered = {"chartA": false, "chartC": false, "chartD": false, "attendance": false};
+let sortState = { "combined": null, "home": null, "away": null };
+let chartRendered = { "chartA": false, "chartC": false, "chartD": false, "attendance": false };
 
 async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
   fullData = await res.json();
   document.getElementById("loading").style.display = "none";
-
-  ['home','away','combined'].forEach(type => {
-    renderTable(type);
-  });
+  ['home', 'away', 'combined'].forEach(type => renderTable(type));
 }
 
 function toHalfWidth(str) {
@@ -23,10 +20,9 @@ function calcAxisLimit(values) {
   let max = Math.ceil((maxRaw + 10) / 10) * 10;
   min = Math.max(0, min);
   max = Math.min(100, max);
-  return {min, max};
+  return { min, max };
 }
 
-// v1.0.3 重構 renderTable：只清除內層 .table-container 容器
 function renderTable(type) {
   const container = document.querySelector(`#${type} .table-container`);
   container.innerHTML = "";
@@ -38,8 +34,8 @@ function renderTable(type) {
   data = [...data];
 
   if (sortState[type]) {
-    const {field, asc} = sortState[type];
-    data.sort((a,b) => {
+    const { field, asc } = sortState[type];
+    data.sort((a, b) => {
       let valA = a[field], valB = b[field];
       if (field === 'current') {
         const extract = s => s.includes("連勝") ? parseInt(s) : s.includes("連敗") ? -parseInt(s) : 0;
@@ -118,15 +114,36 @@ function renderAttendanceTable() {
   const container = document.querySelector('#attendance .table-container');
   container.innerHTML = "";
   const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
-  const table = document.createElement('table');
-  table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
-  const tbody = table.querySelector('tbody');
-  data.forEach(item => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${item.name}</td><td>${item.total}</td>`;
-    tbody.appendChild(row);
-  });
-  container.appendChild(table);
+
+  if (window.innerWidth <= 768) {
+    data.forEach(item => {
+      const imageName = toHalfWidth(item.name)
+        .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '')
+        .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+
+      const card = document.createElement('div');
+      card.className = 'mobile-card';
+      card.innerHTML = `
+        <div class="mobile-header">
+          <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img" onclick="showPhoto('images/${imageName}.jpg')">
+          <div class="mobile-name">${item.name}</div>
+        </div>
+        <div class="mobile-data">出賽數：${item.total}</div>
+      `;
+      container.appendChild(card);
+    });
+
+  } else {
+    const table = document.createElement('table');
+    table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
+    const tbody = table.querySelector('tbody');
+    data.forEach(item => {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${item.name}</td><td>${item.total}</td>`;
+      tbody.appendChild(row);
+    });
+    container.appendChild(table);
+  }
 }
 
 document.querySelectorAll('.tab').forEach(btn => {
@@ -137,7 +154,11 @@ document.querySelectorAll('.tab').forEach(btn => {
     const type = e.target.dataset.type;
     document.getElementById(type).classList.add('active');
 
-    if (type === 'attendance' && !chartRendered.attendance) { renderAttendanceTable(); chartRendered.attendance = true; return; }
+    if (type === 'attendance' && !chartRendered.attendance) { 
+      renderAttendanceTable(); 
+      chartRendered.attendance = true; 
+      return;
+    }
     if (type === 'chartA' && !chartRendered.chartA) { renderChartA(); chartRendered.chartA = true; }
     if (type === 'chartC' && !chartRendered.chartC) { renderChartC(); chartRendered.chartC = true; }
     if (type === 'chartD' && !chartRendered.chartD) { renderChartD(); chartRendered.chartD = true; }
@@ -146,7 +167,6 @@ document.querySelectorAll('.tab').forEach(btn => {
     }
   });
 });
-
 function renderChartA() {
   const ctx = document.getElementById("canvasA").getContext("2d");
   const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
