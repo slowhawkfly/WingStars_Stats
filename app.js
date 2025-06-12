@@ -13,9 +13,14 @@ function toHalfWidth(str) {
   return str.replace(/[\uff01-\uff5e]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
 }
 
+// ✅ 修改後的刻度邏輯
 function calcAxisLimit(values) {
-  const min = Math.max(0, Math.floor(Math.min(...values) - 10));
-  const max = Math.min(100, Math.ceil(Math.max(...values) + 10));
+  const minRaw = Math.min(...values);
+  const maxRaw = Math.max(...values);
+  let min = Math.floor((minRaw - 10) / 10) * 10;
+  let max = Math.ceil((maxRaw + 10) / 10) * 10;
+  min = Math.max(0, min);
+  max = Math.min(100, max);
   return {min, max};
 }
 function renderTable(type) {
@@ -85,7 +90,6 @@ function renderAttendanceTable() {
   });
   container.appendChild(table);
 }
-
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', e => {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -104,6 +108,7 @@ document.querySelectorAll('.tab').forEach(btn => {
     }
   });
 });
+
 function renderChartA() {
   const ctx = document.getElementById("canvasA").getContext("2d");
   const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
@@ -168,6 +173,7 @@ function renderChartC() {
     }
   });
 }
+
 function renderChartD() {
   const ctx = document.getElementById("canvasD").getContext("2d");
   let data = [...fullData['combined']];
