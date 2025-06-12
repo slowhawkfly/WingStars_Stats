@@ -1,78 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap');
-
-:root {
-  --pink: #e43f84;
-  --pink-light: #fce8f0;
-  --gold: #d4b15f;
-  --bg: #fff7f9;
-  --card-bg: #fff;
-  --gray: #f3e5e9;
-  --text: #333;
-  --shadow: rgba(0, 0, 0, 0.1);
-}
-
-* {
-  box-sizing: border-box;
+body {
+  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
 }
 
-body {
-  background: var(--bg);
-  font-family: 'Inter', 'Noto Sans TC', sans-serif;
-  color: var(--text);
-  padding: 1rem;
-}
-
-.header-bar {
-  background: linear-gradient(90deg, var(--pink), var(--gold));
-  color: white;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  margin: 1rem auto 2rem;
-  max-width: 1200px;
-  box-shadow: 0 6px 24px var(--shadow);
+#loading {
   text-align: center;
-  font-weight: 600;
-  font-size: 1.8rem;
+  margin-top: 50px;
+  font-size: 24px;
 }
 
 .tab-bar {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.8rem;
-  margin-bottom: 2rem;
+  background: #333;
 }
 
 .tab {
-  padding: 0.7rem 1.6rem;
-  border-radius: 999px;
+  flex: 1;
+  padding: 10px;
+  color: white;
+  background: #666;
   border: none;
-  background: var(--gray);
-  color: #555;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.tab:hover {
-  background: #eedbe4;
+  font-size: 16px;
 }
 
 .tab.active {
-  background: var(--pink);
-  color: white;
-  box-shadow: 0 4px 12px var(--shadow);
-}
-
-#content-area {
-  max-width: 1200px;
-  margin: auto;
+  background: #ff9999;
 }
 
 .tab-content {
   display: none;
+  padding: 10px;
 }
 
 .tab-content.active {
@@ -82,32 +41,13 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 2rem;
+  margin-top: 10px;
 }
 
-thead {
-  background: var(--pink-light);
-}
-
-thead th {
-  padding: 1rem;
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
   text-align: center;
-  font-weight: 600;
-  color: #444;
-}
-
-tbody td {
-  background: var(--card-bg);
-  text-align: center;
-  padding: 1rem;
-  border-bottom: 8px solid var(--bg);
-  border-radius: 12px;
-  vertical-align: middle;
-}
-
-tbody tr:hover td {
-  box-shadow: 0 4px 16px var(--shadow);
-  transition: 0.2s;
 }
 
 .avatar-img {
@@ -115,125 +55,52 @@ tbody tr:hover td {
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   cursor: pointer;
 }
 
-button.view-btn {
-  border: 2px solid var(--pink);
-  color: var(--pink);
-  background: white;
-  padding: 0.4rem 1rem;
-  border-radius: 999px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-button.view-btn:hover {
-  background: var(--pink);
+.view-btn {
+  padding: 5px 10px;
+  font-size: 14px;
+  background-color: #ff9999;
+  border: none;
+  border-radius: 5px;
   color: white;
 }
 
-#loading {
-  position: fixed;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.9);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.8rem;
-  color: var(--pink);
-}
-
-/* 主出勤明細 Modal */
 .modal {
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 9999;
-  overflow-y: auto;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start;
-  padding: 2rem 0;
-}
-
-.modal.hidden {
-  display: none;
 }
 
 .modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  width: 90%;
-  max-width: 600px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  max-height: 90%;
+  overflow-y: auto;
 }
 
-.modal-content h2 {
-  margin-bottom: 1rem;
-  color: var(--pink);
-}
-
-#modalList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#modalList li {
-  display: flex;
-  justify-content: space-between;
-  background: var(--card-bg);
-  padding: 1rem;
-  border-radius: 0.8rem;
-  margin-bottom: 0.8rem;
-  font-weight: 500;
-}
-
-#modalList li:nth-child(even) {
-  background: var(--pink-light);
-}
-
-.modal-close {
+.modal .close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 1.8rem;
-  color: #999;
+  top: 20px;
+  right: 20px;
+  font-size: 30px;
   cursor: pointer;
 }
 
-/* 照片放大 Modal */
-.photo-modal-content {
-  background: white;
-  padding: 1rem;
-  border-radius: 1rem;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  width: 90%;
-  max-width: 500px;
-  text-align: center;
+.photo-img {
+  max-width: 90vw;
+  max-height: 80vh;
 }
 
-.photo-modal-content img {
-  max-width: 100%;
-  border-radius: 1rem;
-}
-
-canvas {
-  background: white;
-  padding: 1rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 16px var(--shadow);
-  margin-bottom: 2rem;
-}
-
+/* 手機卡片版統一樣式 */
 @media (max-width: 768px) {
 
-  /* 手機版卡片主容器 */
   .mobile-card {
     background: #fdfdfd;
     border: 1px solid #ddd;
@@ -243,7 +110,6 @@ canvas {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
 
-  /* 卡片內部頭像與名稱 */
   .mobile-header {
     display: flex;
     align-items: center;
@@ -264,7 +130,6 @@ canvas {
     color: #333;
   }
 
-  /* 各欄位資料文字 */
   .mobile-data {
     font-size: 16px;
     margin: 4px 0;
@@ -280,10 +145,4 @@ canvas {
     border-radius: 5px;
     color: white;
   }
-
-  /* 原本桌面版 table 在手機隱藏 */
-  table {
-    display: none;
-  }
 }
-
