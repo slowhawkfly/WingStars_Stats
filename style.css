@@ -12,6 +12,26 @@ body {
   text-align: center;
 }
 
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  background: #555;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  color: white;
+  background: #777;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #ff9999;
+}
+
 .sort-bar {
   text-align: center;
   padding: 10px;
@@ -73,6 +93,10 @@ body {
   margin: 8px 0;
 }
 
+.chart-container {
+  padding: 20px;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -111,5 +135,5 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
