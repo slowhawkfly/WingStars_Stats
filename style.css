@@ -230,3 +230,60 @@ canvas {
   box-shadow: 0 4px 16px var(--shadow);
   margin-bottom: 2rem;
 }
+
+@media (max-width: 768px) {
+
+  /* 手機版卡片主容器 */
+  .mobile-card {
+    background: #fdfdfd;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 10px 5px;
+    padding: 12px 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  /* 卡片內部頭像與名稱 */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .mobile-header img.avatar-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+
+  .mobile-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  /* 各欄位資料文字 */
+  .mobile-data {
+    font-size: 16px;
+    margin: 4px 0;
+    color: #555;
+  }
+
+  .view-btn {
+    padding: 6px 12px;
+    font-size: 16px;
+    margin-top: 8px;
+    background-color: #ff9999;
+    border: none;
+    border-radius: 5px;
+    color: white;
+  }
+
+  /* 原本桌面版 table 在手機隱藏 */
+  table {
+    display: none;
+  }
+}
+
