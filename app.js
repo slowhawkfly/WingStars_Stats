@@ -13,7 +13,6 @@ function toHalfWidth(str) {
   return str.replace(/[\uff01-\uff5e]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
 }
 
-// ✅ 修改後的刻度邏輯
 function calcAxisLimit(values) {
   const minRaw = Math.min(...values);
   const maxRaw = Math.max(...values);
@@ -23,6 +22,7 @@ function calcAxisLimit(values) {
   max = Math.min(100, max);
   return {min, max};
 }
+
 function renderTable(type) {
   const container = document.getElementById(type);
   container.innerHTML = "";
@@ -37,7 +37,7 @@ function renderTable(type) {
   table.innerHTML = `<thead><tr>
       <th>照片</th><th data-field="name">成員</th><th data-field="total">出賽數</th>
       <th data-field="win">勝場數</th><th data-field="lose">敗場數</th>
-      <th data-field="winRate">勝率</th><th data-field="current">目前連勝/敗</th>
+      <th data-field="current">目前連勝/敗</th><th data-field="winRate">勝率</th>
       <th>出勤明細</th></tr></thead><tbody></tbody>`;
 
   if (sortState[type]) {
@@ -62,7 +62,7 @@ function renderTable(type) {
         <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img" onclick="showPhoto('images/${imageName}.jpg')">
       </td>
       <td>${item.name}</td><td>${item.total}</td><td>${item.win}</td><td>${item.lose}</td>
-      <td>${(item.winRate*100).toFixed(1)}%</td><td>${item.current}</td>
+      <td>${item.current}</td><td>${(item.winRate*100).toFixed(1)}%</td>
       <td><button class='view-btn' onclick='showDetail("${item.name}","${type}")'>查看</button></td>`;
     tbody.appendChild(row);
   });
@@ -76,7 +76,6 @@ function renderTable(type) {
     }
   });
 }
-
 function renderAttendanceTable() {
   const container = document.getElementById('attendance');
   const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
@@ -90,6 +89,7 @@ function renderAttendanceTable() {
   });
   container.appendChild(table);
 }
+
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', e => {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
