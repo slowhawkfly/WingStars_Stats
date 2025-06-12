@@ -1,58 +1,65 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wing Stars 戰績分析系統 V7.1.8-L</title>
+  <meta charset="UTF-8">
+  <title>WingStars Stats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<header class="header-bar">
-  <h1>Wing Stars 戰績分析系統</h1>
-</header>
+  <div id="loading">載入資料中...</div>
 
-<div class="tab-bar">
-  <button class="tab active" data-type="home">主場戰績</button>
-  <button class="tab" data-type="away">客場戰績</button>
-  <button class="tab" data-type="combined">總戰績</button>
-  <button class="tab" data-type="attendance">出勤場次排行榜</button>
-  <button class="tab" data-type="chartA">勝率排行榜</button>
-  <button class="tab" data-type="chartC">主客場勝率比較</button>
-  <button class="tab" data-type="chartD">連勝連敗排行榜</button>
-  <!-- heatmap 完全移除 -->
-</div>
-
-<main id="content-area">
-  <div id="loading">資料載入中...</div>
-  <div id="home" class="tab-content active"></div>
-  <div id="away" class="tab-content"></div>
-  <div id="combined" class="tab-content"></div>
-  <div id="attendance" class="tab-content"></div>
-  <div id="chartA" class="tab-content"><canvas id="canvasA"></canvas></div>
-  <div id="chartC" class="tab-content"><canvas id="canvasC"></canvas></div>
-  <div id="chartD" class="tab-content"><canvas id="canvasD"></canvas></div>
-</main>
-
-<!-- 出勤明細 Modal -->
-<div id="modal" class="modal hidden">
-  <div class="modal-content">
-    <span class="modal-close" id="modalClose">&times;</span>
-    <h2 id="modalName"></h2>
-    <ul id="modalList"></ul>
+  <div class="tab-bar">
+    <button class="tab active" data-type="home">主場</button>
+    <button class="tab" data-type="away">客場</button>
+    <button class="tab" data-type="combined">總戰績</button>
+    <button class="tab" data-type="attendance">出勤排行</button>
+    <button class="tab" data-type="chartA">勝率排行</button>
+    <button class="tab" data-type="chartC">主客場比較</button>
+    <button class="tab" data-type="chartD">連勝連敗</button>
   </div>
-</div>
 
-<!-- 照片放大 Modal -->
-<div id="photoModal" class="modal hidden">
-  <div class="photo-modal-content">
-    <span class="modal-close" id="photoModalClose">&times;</span>
-    <img id="photoModalImg" src="" alt="Photo" />
+  <div id="content">
+    <div id="home" class="tab-content active">
+      <div class="table-container"></div>
+    </div>
+    <div id="away" class="tab-content">
+      <div class="table-container"></div>
+    </div>
+    <div id="combined" class="tab-content">
+      <div class="table-container"></div>
+    </div>
+    <div id="attendance" class="tab-content"></div>
+    <div id="chartA" class="tab-content">
+      <canvas id="canvasA"></canvas>
+    </div>
+    <div id="chartC" class="tab-content">
+      <canvas id="canvasC"></canvas>
+    </div>
+    <div id="chartD" class="tab-content">
+      <canvas id="canvasD"></canvas>
+    </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="app.js"></script>
+  <!-- 出勤明細 Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="modalClose" class="close">&times;</span>
+      <h2 id="modalName"></h2>
+      <ul id="modalList"></ul>
+    </div>
+  </div>
 
+  <!-- 照片 Modal -->
+  <div id="photoModal" class="modal hidden">
+    <div class="modal-content">
+      <span id="photoModalClose" class="close">&times;</span>
+      <img id="photoModalImg" class="photo-img">
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
