@@ -1,3 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>WingStars Stats</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+
 <div class="tab-bar">
   <button class="tab active" data-type="home">主場戰績</button>
   <button class="tab" data-type="away">客場戰績</button>
@@ -7,12 +18,14 @@
   <button class="tab" data-type="chartC">主客場勝率比較</button>
   <button class="tab" data-type="chartD">連勝連敗排行</button>
 </div>
+
 <div id="home" class="tab-content active">
   <div class="table-container">
     <table>
       <thead>
         <tr>
           <th>WS</th>
+          <th>排名</th>
           <th>成員</th>
           <th>出賽數</th>
           <th>勝場數</th>
@@ -33,6 +46,7 @@
       <thead>
         <tr>
           <th>WS</th>
+          <th>排名</th>
           <th>成員</th>
           <th>出賽數</th>
           <th>勝場數</th>
@@ -53,6 +67,7 @@
       <thead>
         <tr>
           <th>WS</th>
+          <th>排名</th>
           <th>成員</th>
           <th>出賽數</th>
           <th>勝場數</th>
@@ -66,6 +81,7 @@
     </table>
   </div>
 </div>
+
 <div id="attendance" class="tab-content">
   <div class="table-container"></div>
 </div>
@@ -98,3 +114,6 @@
 </div>
 
 <div id="loading">Loading...</div>
+
+</body>
+</html>
