@@ -1,116 +1,135 @@
 let fullData = {};
-let currentTab = "combined";
-let currentSort = "winRate";
-let chart = null;
+let sortState = { "combined": null, "home": null, "away": null };
+let chartRendered = { "chartA": false, "chartC": false, "chartD": false, "attendance": false };
 
 async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
   fullData = await res.json();
-  document.getElementById("loading").classList.add("hidden");
-  renderTab();
+  document.getElementById("loading").style.display = "none";
+  ['home', 'away', 'combined'].forEach(type => renderTable(type));
 }
 
-function renderTab() {
-  document.getElementById("chartContainer").classList.add("hidden");
-  document.getElementById("cardContainer").classList.remove("hidden");
-  document.querySelector(".sort-bar").classList.remove("hidden");
-
-  if (currentTab === "attendance") {
-    renderAttendance();
-  } else if (currentTab === "chartA") {
-    renderChartA();
-  } else if (currentTab === "chartC") {
-    renderChartC();
-  } else if (currentTab === "chartD") {
-    renderChartD();
-  } else {
-    renderCards();
-  }
+function toHalfWidth(str) {
+  return str.replace(/[\uff01-\uff5e]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/\u3000/g, ' ');
 }
 
-function sortBy(field) {
-  currentSort = field;
-  renderCards();
-}
-
-function fieldValue(obj, field) {
-  if (field === 'current') {
-    if (obj.current.includes("連勝")) return parseInt(obj.current);
-    if (obj.current.includes("連敗")) return -parseInt(obj.current);
-    return 0;
-  }
-  return obj[field] ?? 0;
-}
-
-function sanitizeName(name) {
-  return name.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
-}
-
-function renderCards() {
-  let data = [...fullData[currentTab]];
-  data.sort((a, b) => fieldValue(b, currentSort) - fieldValue(a, currentSort));
-
-  const container = document.getElementById("cardContainer");
+function renderTable(type) {
+  const container = document.getElementById(type);
   container.innerHTML = "";
 
+  if (window.innerWidth <= 768) {
+    renderCardTable(container, [...fullData[type]], type);
+  } else {
+    renderNormalTable(container, [...fullData[type]], type);
+  }
+}
+
+function renderNormalTable(container, data, type) {
+  const table = document.createElement('table');
+  table.innerHTML = `
+  <thead><tr>
+  <th>WS</th><th>排名</th><th>成員</th><th>出賽數</th><th>勝場數</th>
+  <th>敗場數</th><th>目前連勝/敗</th><th>勝率</th><th>出勤明細</th>
+  </tr></thead><tbody></tbody>`;
+  const tbody = table.querySelector('tbody');
+  
+  data.sort((a, b) => b.winRate - a.winRate);
+  data.forEach((d, i) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${i+1}</td>
+      <td>${i+1}</td>
+      <td>${d.name}</td>
+      <td>${d.total}</td>
+      <td>${d.win}</td>
+      <td>${d.lose}</td>
+      <td>${d.current}</td>
+      <td>${(d.winRate*100).toFixed(1)}%</td>
+      <td><button onclick="showDetail('${d.name}','${type}')">明細</button></td>
+    `;
+    tbody.appendChild(row);
+  });
+  container.appendChild(table);
+}
+function renderCardTable(container, data, type) {
+  const cardContainer = document.createElement("div");
+  cardContainer.className = "mobile-card-container";
+
+  data.sort((a, b) => b.winRate - a.winRate);
   data.forEach(d => {
+    const imageName = toHalfWidth(d.name).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
     const card = document.createElement("div");
-    card.className = "card";
-    const imageName = sanitizeName(d.name);
+    card.className = "mobile-card";
     card.innerHTML = `
-      <img src="images/${imageName}.jpg" onerror="this.src='default.png'" alt="${d.name}">
-      <div class="card-content">
+      <img src="images/${imageName}.jpg" alt="${d.name}" onerror="this.src='default.png'">
+      <div class="mobile-card-content">
         <h3>${d.name}</h3>
         <p>出賽數：${d.total}</p>
         <p>勝場數：${d.win}</p>
         <p>敗場數：${d.lose}</p>
-        <p>連勝/敗：${d.current}</p>
-        <p>勝率：${(d.winRate*100).toFixed(1)}%</p>
-        <button onclick="showDetail('${d.name}')">出勤明細</button>
+        <p>目前連勝/敗：${d.current}</p>
+        <p>勝率：${(d.winRate * 100).toFixed(1)}%</p>
+        <button onclick="showDetail('${d.name}','${type}')">明細</button>
       </div>
     `;
-    container.appendChild(card);
+    cardContainer.appendChild(card);
   });
+
+  container.appendChild(cardContainer);
 }
-function renderAttendance() {
-  const container = document.getElementById("cardContainer");
+
+function renderAttendanceTable() {
+  const container = document.querySelector('#attendance');
   container.innerHTML = "";
-  document.querySelector(".sort-bar").classList.add("hidden");
+  const data = [...fullData['combined']].sort((a, b) => b.total - a.total);
 
-  let data = [...fullData['combined']].sort((a, b) => b.total - a.total);
-  data.forEach(d => {
-    const card = document.createElement("div");
-    card.className = "card";
-    const imageName = sanitizeName(d.name);
-    card.innerHTML = `
-      <img src="images/${imageName}.jpg" onerror="this.src='default.png'" alt="${d.name}">
-      <div class="card-content">
-        <h3>${d.name}</h3>
-        <p>出賽數：${d.total}</p>
-      </div>
-    `;
-    container.appendChild(card);
-  });
+  if (window.innerWidth <= 768) {
+    const cardContainer = document.createElement("div");
+    cardContainer.className = "mobile-card-container";
+    data.forEach(d => {
+      const imageName = toHalfWidth(d.name).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+      const card = document.createElement("div");
+      card.className = "mobile-card";
+      card.innerHTML = `
+        <img src="images/${imageName}.jpg" alt="${d.name}" onerror="this.src='default.png'">
+        <div class="mobile-card-content">
+          <h3>${d.name}</h3>
+          <p>出賽數：${d.total}</p>
+        </div>
+      `;
+      cardContainer.appendChild(card);
+    });
+    container.appendChild(cardContainer);
+  } else {
+    const table = document.createElement("table");
+    table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
+    const tbody = table.querySelector("tbody");
+    data.forEach(d => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${d.name}</td><td>${d.total}</td>`;
+      tbody.appendChild(row);
+    });
+    container.appendChild(table);
+  }
 }
-
 function renderChartA() {
-  switchToChart();
-  let data = [...fullData['combined']].sort((a, b) => b.winRate - a.winRate);
+  const ctx = document.getElementById("canvasA").getContext("2d");
+  const data = [...fullData['combined']].sort((a, b) => b.winRate - a.winRate);
   const labels = data.map(d => d.name);
   const winRates = data.map(d => +(d.winRate * 100).toFixed(1));
 
-  chart = new Chart(document.getElementById("chartCanvas"), {
+  new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
       datasets: [{ label: '勝率 %', data: winRates, backgroundColor: '#ff9999' }]
     },
-    options: { indexAxis: 'y', responsive: true }
+    options: { responsive: true, indexAxis: 'y' }
   });
 }
 
 function renderChartC() {
-  switchToChart();
+  const ctx = document.getElementById("canvasC").getContext("2d");
   const combined = fullData['combined'];
   const home = fullData['home'];
   const away = fullData['away'];
@@ -118,7 +137,7 @@ function renderChartC() {
   const homeRates = home.map(d => +(d.winRate * 100).toFixed(1));
   const awayRates = away.map(d => +(d.winRate * 100).toFixed(1));
 
-  chart = new Chart(document.getElementById("chartCanvas"), {
+  new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
@@ -127,11 +146,12 @@ function renderChartC() {
         { label: '客場勝率', data: awayRates, backgroundColor: '#ff99cc' }
       ]
     },
-    options: { indexAxis: 'y', responsive: true }
+    options: { responsive: true, indexAxis: 'y' }
   });
 }
+
 function renderChartD() {
-  switchToChart();
+  const ctx = document.getElementById("canvasD").getContext("2d");
   let data = [...fullData['combined']].map(d => {
     let val = 0;
     if (d.current.includes("連勝")) val = parseInt(d.current);
@@ -143,45 +163,56 @@ function renderChartD() {
   const streaks = data.map(d => d.streakVal);
   const colors = streaks.map(v => v < 0 ? "#ff7777" : "#77b5ff");
 
-  chart = new Chart(document.getElementById("chartCanvas"), {
+  new Chart(ctx, {
     type: 'bar',
     data: { labels: labels, datasets: [{ label: '目前連勝/連敗', data: streaks, backgroundColor: colors }] },
-    options: { indexAxis: 'y', responsive: true }
+    options: { responsive: true, indexAxis: 'y' }
   });
 }
 
-function switchToChart() {
-  document.getElementById("cardContainer").classList.add("hidden");
-  document.getElementById("chartContainer").classList.remove("hidden");
-  document.querySelector(".sort-bar").classList.add("hidden");
-  if (chart) chart.destroy();
+function showDetail(name, type) {
+  const d = fullData[type].find(d => d.name === name);
+  const modal = document.getElementById("modal");
+  const modalImage = document.getElementById("modalImage");
+  const modalText = document.getElementById("modalText");
+  modalImage.src = `images/${name}.jpg`;
+
+  const details = d.detail || [];
+  const detailHtml = details.length > 0
+    ? `<ul>${details.map(g => `<li>${g.date}（${g.weekday_fixed}）${g.stadium} ${g.opponent_fixed} ${g.opp_score}:${g.self_score} ${g.result}</li>`).join('')}</ul>`
+    : "<p>無出勤資料</p>";
+
+  modalText.innerHTML = `<h3>${d.name} 出勤明細</h3>${detailHtml}`;
+  modal.classList.remove("hidden");
 }
 
-function showDetail(name) {
-  const d = fullData[currentTab].find(d => d.name === name);
-  document.getElementById("modalName").innerText = name + " 出勤明細";
-  const ul = document.getElementById("modalList");
-  ul.innerHTML = "";
-
-  d.detail.forEach(record => {
-    const li = document.createElement("li");
-    li.innerHTML = `${record.date}（${record.weekday_fixed}） ${record.stadium} ${record.opponent_fixed} ${record.opp_score}:${record.self_score} ${record.result}`;
-    ul.appendChild(li);
-  });
-
-  document.getElementById("modal").classList.remove("hidden");
-}
-
-document.getElementById("modalClose").onclick = () => {
+document.querySelector(".close-button").onclick = () => {
   document.getElementById("modal").classList.add("hidden");
 };
 
-document.querySelectorAll(".tab").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    currentTab = btn.dataset.tab;
-    renderTab();
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+    document.getElementById(tab.dataset.type).classList.add("active");
+
+    if (tab.dataset.type === "attendance" && !chartRendered.attendance) {
+      renderAttendanceTable();
+      chartRendered.attendance = true;
+    }
+    if (tab.dataset.type === "chartA" && !chartRendered.chartA) {
+      renderChartA();
+      chartRendered.chartA = true;
+    }
+    if (tab.dataset.type === "chartC" && !chartRendered.chartC) {
+      renderChartC();
+      chartRendered.chartC = true;
+    }
+    if (tab.dataset.type === "chartD" && !chartRendered.chartD) {
+      renderChartD();
+      chartRendered.chartD = true;
+    }
   });
 });
 
