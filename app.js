@@ -154,6 +154,10 @@ document.querySelectorAll('.tab').forEach(btn => {
     const type = e.target.dataset.type;
     document.getElementById(type).classList.add('active');
 
+    // 🚩 Patch 1: 強制關閉所有 Modal 防止遮罩殘留
+    document.getElementById("modal").classList.add("hidden");
+    document.getElementById("photoModal").classList.add("hidden");
+
     if (type === 'attendance' && !chartRendered.attendance) { 
       renderAttendanceTable(); 
       chartRendered.attendance = true; 
