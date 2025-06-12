@@ -7,10 +7,7 @@ async function loadData() {
   fullData = await res.json();
   document.getElementById("loading").style.display = "none";
 
-  // 先為三個戰績計算排名
   ['home', 'away', 'combined'].forEach(type => calculateRank(type));
-
-  // 再渲染表格
   ['home', 'away', 'combined'].forEach(type => renderTable(type));
 }
 
@@ -31,7 +28,6 @@ function calculateRank(type) {
     }
   });
 
-  // 將排名回寫到原本的 fullData
   data.forEach(item => {
     const original = fullData[type].find(d => d.name === item.name);
     original.rank = item.rank;
