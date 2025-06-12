@@ -2,6 +2,7 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+  background-color: #fafafa;
 }
 
 #loading {
@@ -40,14 +41,37 @@ body {
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0 8px;
   margin-top: 10px;
+  background-color: #fff;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
+th {
+  background-color: #ffcccc;
+  color: #333;
+  font-weight: bold;
+  padding: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+td {
+  background-color: #fffafa;
+  padding: 12px;
   text-align: center;
+  border-top: 1px solid #f2f2f2;
+}
+
+tbody tr {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+tbody tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .avatar-img {
@@ -56,10 +80,11 @@ th, td {
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
+  border: 2px solid #ff9999;
 }
 
 .view-btn {
-  padding: 5px 10px;
+  padding: 6px 12px;
   font-size: 14px;
   background-color: #ff9999;
   border: none;
@@ -98,9 +123,19 @@ th, td {
   max-height: 80vh;
 }
 
-/* 手機卡片版統一樣式 */
-@media (max-width: 768px) {
+.hidden {
+  display: none !important;
+}
 
+.modal.hidden {
+  z-index: -1 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  display: none !important;
+}
+
+/* 手機卡片統一樣式 */
+@media (max-width: 768px) {
   .mobile-card {
     background: #fdfdfd;
     border: 1px solid #ddd;
@@ -145,8 +180,4 @@ th, td {
     border-radius: 5px;
     color: white;
   }
-}
-
-.hidden {
-  display: none !important;
 }
