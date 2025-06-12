@@ -1,119 +1,190 @@
-/* 全局樣式重置與字體定義 */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: #f5f5f5;
-  color: #333;
+  background-color: #fafafa;
 }
 
-/* 頁籤區塊 */
-.tabs {
+#loading {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 24px;
+}
+
+.tab-bar {
   display: flex;
   flex-wrap: wrap;
-  background-color: #4caf50;
+  background: #333;
 }
 
-.tabButton {
+.tab {
   flex: 1;
-  padding: 15px;
-  border: none;
-  background-color: #4caf50;
+  padding: 10px;
   color: white;
+  background: #666;
+  border: none;
   font-size: 16px;
-  cursor: pointer;
+}
+
+.tab.active {
+  background: #ff9999;
+}
+
+.tab-content {
+  display: none;
+  padding: 10px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  margin-top: 10px;
+  background-color: #fff;
+}
+
+th {
+  background-color: #ffcccc;
+  color: #333;
+  font-weight: bold;
+  padding: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+td {
+  background-color: #fffafa;
+  padding: 12px;
+  text-align: center;
+  border-top: 1px solid #f2f2f2;
+}
+
+tbody tr {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: 0.3s;
 }
 
-.tabButton:hover, .tabButton.active {
-  background-color: #388e3c;
+tbody tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* 主要內容區域 */
-#content {
-  padding: 20px;
+tbody tr td:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
 }
 
-/* 卡片基本樣式 */
-.card {
-  background: white;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+tbody tr td:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
-
-/* 卡片內圖片 */
-.card img {
-  width: 100px;
-  height: 100px;
+.avatar-img {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 15px;
-}
-/* Modal 遮罩樣式 (照片與明細共用) */
-.modal {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99;
+  cursor: pointer;
+  border: 2px solid #ff9999;
 }
 
-.modal img {
-  max-width: 90%;
-  max-height: 90%;
+.view-btn {
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #ff9999;
+  border: none;
+  border-radius: 5px;
+  color: white;
+}
+
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
   border-radius: 10px;
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+.modal .close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.photo-img {
+  max-width: 90vw;
+  max-height: 80vh;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
-/* 表格預備樣式 (暫時保留以防未來回歸) */
-table {
-  border-collapse: collapse;
-  width: 100%;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+.modal.hidden {
+  z-index: -1 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  display: none !important;
 }
 
-th, td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  text-align: center;
-}
-
-thead {
-  background-color: #eee;
-}
-
-/* RWD 手機版卡片適配 */
+/* 手機卡片統一樣式 */
 @media (max-width: 768px) {
-  .card {
-    flex-direction: column;
-    text-align: center;
+  .mobile-card {
+    background: #fdfdfd;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 10px 5px;
+    padding: 12px 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   }
 
-  .card img {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 10px;
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
   }
 
-  .tabs {
-    flex-direction: column;
+  .mobile-header img.avatar-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
   }
 
-  .tabButton {
-    width: 100%;
+  .mobile-name {
     font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .mobile-data {
+    font-size: 16px;
+    margin: 4px 0;
+    color: #555;
+  }
+
+  .view-btn {
+    padding: 6px 12px;
+    font-size: 16px;
+    margin-top: 8px;
+    background-color: #ff9999;
+    border: none;
+    border-radius: 5px;
+    color: white;
   }
 }
