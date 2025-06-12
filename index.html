@@ -1,33 +1,68 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8">
-  <title>WingStars 勝率統計</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="tabs">
-    <button class="tabButton active" onclick="renderCards('home')">主場戰績</button>
-    <button class="tabButton" onclick="renderCards('away')">客場戰績</button>
-    <button class="tabButton" onclick="renderCards('combined')">總戰績</button>
-    <button class="tabButton" onclick="renderAttendance()">出勤排行</button>
-    <button class="tabButton" onclick="renderWinRate()">勝率排行</button>
-    <button class="tabButton" onclick="renderCompare()">主客場勝率比較</button>
-    <button class="tabButton" onclick="renderStreak()">連勝連敗排行</button>
+<div class="tab-bar">
+  <button class="tab active" data-type="home">主場戰績</button>
+  <button class="tab" data-type="away">客場戰績</button>
+  <button class="tab" data-type="combined">總戰績</button>
+  <button class="tab" data-type="attendance">出勤排行</button>
+  <button class="tab" data-type="chartA">勝率排行</button>
+  <button class="tab" data-type="chartC">主客場勝率比較</button>
+  <button class="tab" data-type="chartD">連勝連敗排行</button>
+</div>
+<div id="home" class="tab-content active">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>WS</th>
+          <th>成員</th>
+          <th>出賽數</th>
+          <th>勝場數</th>
+          <th>敗場數</th>
+          <th>目前連勝/敗</th>
+          <th>勝率</th>
+          <th>出勤明細</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
+</div>
 
-  <div id="content"></div>
-
-  <!-- 照片 Modal -->
-  <div id="photoModal" class="modal hidden" onclick="closePhotoModal()">
-    <img id="modalImage" src="">
+<div id="away" class="tab-content">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>WS</th>
+          <th>成員</th>
+          <th>出賽數</th>
+          <th>勝場數</th>
+          <th>敗場數</th>
+          <th>目前連勝/敗</th>
+          <th>勝率</th>
+          <th>出勤明細</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
+</div>
 
-  <!-- 出勤明細 Modal -->
-  <div id="detailModal" class="modal hidden" onclick="closeDetailModal()">
-    <div class="modalContent" id="detailContent"></div>
+<div id="combined" class="tab-content">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>WS</th>
+          <th>成員</th>
+          <th>出賽數</th>
+          <th>勝場數</th>
+          <th>敗場數</th>
+          <th>目前連勝/敗</th>
+          <th>勝率</th>
+          <th>出勤明細</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
-
-  <script src="app.js"></script>
-</body>
-</html>
+</div>
