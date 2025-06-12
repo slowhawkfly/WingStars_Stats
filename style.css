@@ -81,6 +81,7 @@ tbody tr td:last-child {
   border-top-right-radius: 12px;
   border-bottom-right-radius: 12px;
 }
+
 .avatar-img {
   width: 50px;
   height: 50px;
@@ -186,5 +187,42 @@ tbody tr td:last-child {
     border: none;
     border-radius: 5px;
     color: white;
+  }
+}
+/* 新增 RWD 卡片樣式（完整卡片模式通用，桌面＋手機通用） */
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.card-content {
+  padding: 12px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .card-content {
+    font-size: 14px;
   }
 }
