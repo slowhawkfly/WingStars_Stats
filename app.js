@@ -6,7 +6,10 @@ async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
   fullData = await res.json();
   document.getElementById("loading").style.display = "none";
-  ['home','away','combined'].forEach(type => renderTable(type));
+
+  ['home','away','combined'].forEach(type => {
+    renderTable(type);
+  });
 }
 
 function toHalfWidth(str) {
@@ -23,8 +26,9 @@ function calcAxisLimit(values) {
   return {min, max};
 }
 
+// v1.0.3 重構 renderTable：只清除內層 .table-container 容器
 function renderTable(type) {
-  const container = document.getElementById(type);
+  const container = document.querySelector(`#${type} .table-container`);
   container.innerHTML = "";
   let data = fullData[type];
   if (!data || data.length === 0) {
@@ -33,7 +37,6 @@ function renderTable(type) {
   }
   data = [...data];
 
-  // 排序邏輯
   if (sortState[type]) {
     const {field, asc} = sortState[type];
     data.sort((a,b) => {
@@ -46,14 +49,12 @@ function renderTable(type) {
     });
   }
 
-  // 判斷手機版或桌面版
   if (window.innerWidth <= 768) {
     renderCardTable(container, data, type);
   } else {
     renderNormalTable(container, data, type);
   }
 }
-
 function renderNormalTable(container, data, type) {
   const table = document.createElement('table');
   table.innerHTML = `<thead><tr>
@@ -79,8 +80,8 @@ function renderNormalTable(container, data, type) {
 
   container.appendChild(table);
 
-  table.querySelectorAll('th[data-field]').forEach(th=>{
-    th.onclick = ()=>{ 
+  table.querySelectorAll('th[data-field]').forEach(th => {
+    th.onclick = () => {
       const field = th.dataset.field;
       if (sortState[type] && sortState[type].field === field)
         sortState[type].asc = !sortState[type].asc;
@@ -89,6 +90,7 @@ function renderNormalTable(container, data, type) {
     }
   });
 }
+
 function renderCardTable(container, data, type) {
   data.forEach(item => {
     const imageName = toHalfWidth(item.name)
@@ -112,7 +114,6 @@ function renderCardTable(container, data, type) {
     container.appendChild(card);
   });
 }
-
 function renderAttendanceTable() {
   const container = document.getElementById('attendance');
   const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
@@ -127,9 +128,6 @@ function renderAttendanceTable() {
   container.appendChild(table);
 }
 
-// 其餘 tab 切換、chart 渲染、出勤明細 modal、照片 modal 全保留不變 (與 v1.0.1 相同)
-// 因篇幅限制，我暫不重複送出 — 你目前的 app.js 其他區塊都仍適用，完全可套用
-
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', e => {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -143,10 +141,117 @@ document.querySelectorAll('.tab').forEach(btn => {
     if (type === 'chartC' && !chartRendered.chartC) { renderChartC(); chartRendered.chartC = true; }
     if (type === 'chartD' && !chartRendered.chartD) { renderChartD(); chartRendered.chartD = true; }
     if (['home','away','combined'].includes(type)) {
-      sortState[type] = null;
       renderTable(type);
     }
   });
+});
+
+function renderChartA() {
+  const ctx = document.getElementById("canvasA").getContext("2d");
+  const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
+  const labels = data.map(d => d.name);
+  const winRates = data.map(d => +(d.winRate * 100).toFixed(1));
+  const axis = calcAxisLimit(winRates);
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ label: '勝率 %', data: winRates }] },
+    options: {
+      responsive: true, indexAxis: 'y',
+      scales: { x: { min: axis.min, max: axis.max, ticks: { stepSize: 10 } } }
+    }
+  });
+}
+
+function renderChartC() {
+  const ctx = document.getElementById("canvasC").getContext("2d");
+  const combined = fullData['combined'];
+  const home = fullData['home'];
+  const away = fullData['away'];
+  const labels = combined.map(d => d.name);
+  const homeRates = home.map(d => +(d.winRate * 100).toFixed(1));
+  const awayRates = away.map(d => +(d.winRate * 100).toFixed(1));
+  const allRates = homeRates.concat(awayRates);
+  const axis = calcAxisLimit(allRates);
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: '主場勝率', data: homeRates, backgroundColor:'#99ccff' },
+        { label: '客場勝率', data: awayRates, backgroundColor:'#ff99cc' }
+      ]
+    },
+    options: {
+      responsive: true, indexAxis: 'y',
+      scales: { x: { min: axis.min, max: axis.max, ticks: { stepSize: 10 } } }
+    }
+  });
+}
+
+function renderChartD() {
+  const ctx = document.getElementById("canvasD").getContext("2d");
+  let data = [...fullData['combined']];
+  data = data.map(d => {
+    let val = 0;
+    if (d.current.includes("連勝")) val = parseInt(d.current);
+    if (d.current.includes("連敗")) val = -parseInt(d.current);
+    return {...d, streakVal: val};
+  }).sort((a,b)=>b.streakVal-a.streakVal);
+
+  const labels = data.map(d => d.name);
+  const streaks = data.map(d => d.streakVal);
+  const colors = streaks.map(v => v < 0 ? "#ff7777" : "#77b5ff");
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{ label: '目前連勝/連敗', data: streaks, backgroundColor: colors }]
+    },
+    options: { responsive: true, indexAxis: 'y' }
+  });
+}
+
+function showDetail(name, type) {
+  const item = fullData[type].find(d => d.name === name);
+  document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
+  const ul = document.getElementById('modalList'); 
+  ul.innerHTML = '';
+
+  item.detail.forEach((d, idx) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span>${d.date}（${d.weekday_fixed}）</span>
+      <span>${d.stadium}</span>
+      <span>${d.opponent_fixed} ${d.opp_score}：${d.self_score} 啾啾</span>
+      <span>${d.result}</span>`;
+    ul.appendChild(li);
+  });
+
+  document.getElementById("modal").classList.remove("hidden");
+}
+
+document.getElementById("modalClose").onclick = () => {
+  document.getElementById("modal").classList.add("hidden");
+};
+
+document.getElementById("modal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
+});
+
+function showPhoto(src) {
+  document.getElementById('photoModalImg').src = src;
+  document.getElementById('photoModal').classList.remove("hidden");
+}
+
+document.getElementById("photoModalClose").onclick = () => {
+  document.getElementById("photoModal").classList.add("hidden");
+};
+
+document.getElementById("photoModal").addEventListener("click", function(e) {
+  if (e.target === e.currentTarget) this.classList.add("hidden");
 });
 
 loadData();
