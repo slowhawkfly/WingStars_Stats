@@ -2,16 +2,12 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>WingStars Stats - 雙邏輯完整版</title>
+  <title>WingStars Stats</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
-
-<div class="header">
-  <h1>WingStars Stats 勝率系統</h1>
-</div>
 
 <div class="tab-bar">
   <button class="tab active" data-type="home">主場戰績</button>
@@ -23,24 +19,101 @@
   <button class="tab" data-type="chartD">連勝連敗排行</button>
 </div>
 
-<div id="loading">資料讀取中...</div>
+<div id="home" class="tab-content active">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>WS</th>
+          <th>排名</th>
+          <th>成員</th>
+          <th>出賽數</th>
+          <th>勝場數</th>
+          <th>敗場數</th>
+          <th>目前連勝/敗</th>
+          <th>勝率</th>
+          <th>出勤明細</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
-<div id="home" class="tab-content active"></div>
-<div id="away" class="tab-content"></div>
-<div id="combined" class="tab-content"></div>
-<div id="attendance" class="tab-content"></div>
+<div id="away" class="tab-content">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>WS</th>
+          <th>排名</th>
+          <th>成員</th>
+          <th>出賽數</th>
+          <th>勝場數</th>
+          <th>敗場數</th>
+          <th>目前連勝/敗</th>
+          <th>勝率</th>
+          <th>出勤明細</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
-<div id="chartA" class="tab-content"><canvas id="canvasA"></canvas></div>
-<div id="chartC" class="tab-content"><canvas id="canvasC"></canvas></div>
-<div id="chartD" class="tab-content"><canvas id="canvasD"></canvas></div>
+<div id="combined" class="tab-content">
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>WS</th>
+          <th>排名</th>
+          <th>成員</th>
+          <th>出賽數</th>
+          <th>勝場數</th>
+          <th>敗場數</th>
+          <th>目前連勝/敗</th>
+          <th>勝率</th>
+          <th>出勤明細</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="attendance" class="tab-content">
+  <div class="table-container"></div>
+</div>
+
+<div id="chartA" class="tab-content">
+  <canvas id="canvasA"></canvas>
+</div>
+
+<div id="chartC" class="tab-content">
+  <canvas id="canvasC"></canvas>
+</div>
+
+<div id="chartD" class="tab-content">
+  <canvas id="canvasD"></canvas>
+</div>
 
 <div id="modal" class="modal hidden">
   <div class="modal-content">
-    <span class="close-button">&times;</span>
-    <img id="modalImage" src="" alt="">
-    <div id="modalText"></div>
+    <span class="close" id="modalClose">&times;</span>
+    <h2 id="modalName"></h2>
+    <ul id="modalList"></ul>
   </div>
 </div>
+
+<div id="photoModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="photoModalClose">&times;</span>
+    <img id="photoModalImg" class="photo-img">
+  </div>
+</div>
+
+<div id="loading">Loading...</div>
 
 </body>
 </html>
