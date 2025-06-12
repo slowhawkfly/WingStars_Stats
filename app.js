@@ -1,12 +1,31 @@
-let fullData = [];
-let currentSort = 'winRate';
+let fullData = {};
+let currentTab = "combined";
+let currentSort = "winRate";
+let chart = null;
 
 async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
-  const json = await res.json();
-  fullData = [...json.combined];
-  renderCards();
+  fullData = await res.json();
   document.getElementById("loading").classList.add("hidden");
+  renderTab();
+}
+
+function renderTab() {
+  document.getElementById("chartContainer").classList.add("hidden");
+  document.getElementById("cardContainer").classList.remove("hidden");
+  document.querySelector(".sort-bar").classList.remove("hidden");
+
+  if (currentTab === "attendance") {
+    renderAttendance();
+  } else if (currentTab === "chartA") {
+    renderChartA();
+  } else if (currentTab === "chartC") {
+    renderChartC();
+  } else if (currentTab === "chartD") {
+    renderChartD();
+  } else {
+    renderCards();
+  }
 }
 
 function sortBy(field) {
@@ -14,19 +33,27 @@ function sortBy(field) {
   renderCards();
 }
 
-function renderCards() {
-  let sortedData = [...fullData];
+function fieldValue(obj, field) {
+  if (field === 'current') {
+    if (obj.current.includes("連勝")) return parseInt(obj.current);
+    if (obj.current.includes("連敗")) return -parseInt(obj.current);
+    return 0;
+  }
+  return obj[field] ?? 0;
+}
 
-  sortedData.sort((a, b) => {
-    let valA = (fieldValue(a, currentSort));
-    let valB = (fieldValue(b, currentSort));
-    return valB - valA;
-  });
+function sanitizeName(name) {
+  return name.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+}
+
+function renderCards() {
+  let data = [...fullData[currentTab]];
+  data.sort((a, b) => fieldValue(b, currentSort) - fieldValue(a, currentSort));
 
   const container = document.getElementById("cardContainer");
   container.innerHTML = "";
 
-  sortedData.forEach(d => {
+  data.forEach(d => {
     const card = document.createElement("div");
     card.className = "card";
     const imageName = sanitizeName(d.name);
@@ -45,22 +72,93 @@ function renderCards() {
     container.appendChild(card);
   });
 }
+function renderAttendance() {
+  const container = document.getElementById("cardContainer");
+  container.innerHTML = "";
+  document.querySelector(".sort-bar").classList.add("hidden");
 
-function fieldValue(obj, field) {
-  if (field === 'current') {
-    if (obj.current.includes("連勝")) return parseInt(obj.current);
-    if (obj.current.includes("連敗")) return -parseInt(obj.current);
-    return 0;
-  }
-  return obj[field] ?? 0;
+  let data = [...fullData['combined']].sort((a, b) => b.total - a.total);
+  data.forEach(d => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const imageName = sanitizeName(d.name);
+    card.innerHTML = `
+      <img src="images/${imageName}.jpg" onerror="this.src='default.png'" alt="${d.name}">
+      <div class="card-content">
+        <h3>${d.name}</h3>
+        <p>出賽數：${d.total}</p>
+      </div>
+    `;
+    container.appendChild(card);
+  });
 }
 
-function sanitizeName(name) {
-  return name.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+function renderChartA() {
+  switchToChart();
+  let data = [...fullData['combined']].sort((a, b) => b.winRate - a.winRate);
+  const labels = data.map(d => d.name);
+  const winRates = data.map(d => +(d.winRate * 100).toFixed(1));
+
+  chart = new Chart(document.getElementById("chartCanvas"), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{ label: '勝率 %', data: winRates, backgroundColor: '#ff9999' }]
+    },
+    options: { indexAxis: 'y', responsive: true }
+  });
+}
+
+function renderChartC() {
+  switchToChart();
+  const combined = fullData['combined'];
+  const home = fullData['home'];
+  const away = fullData['away'];
+  const labels = combined.map(d => d.name);
+  const homeRates = home.map(d => +(d.winRate * 100).toFixed(1));
+  const awayRates = away.map(d => +(d.winRate * 100).toFixed(1));
+
+  chart = new Chart(document.getElementById("chartCanvas"), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: '主場勝率', data: homeRates, backgroundColor: '#99ccff' },
+        { label: '客場勝率', data: awayRates, backgroundColor: '#ff99cc' }
+      ]
+    },
+    options: { indexAxis: 'y', responsive: true }
+  });
+}
+function renderChartD() {
+  switchToChart();
+  let data = [...fullData['combined']].map(d => {
+    let val = 0;
+    if (d.current.includes("連勝")) val = parseInt(d.current);
+    if (d.current.includes("連敗")) val = -parseInt(d.current);
+    return {...d, streakVal: val};
+  }).sort((a, b) => b.streakVal - a.streakVal);
+
+  const labels = data.map(d => d.name);
+  const streaks = data.map(d => d.streakVal);
+  const colors = streaks.map(v => v < 0 ? "#ff7777" : "#77b5ff");
+
+  chart = new Chart(document.getElementById("chartCanvas"), {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ label: '目前連勝/連敗', data: streaks, backgroundColor: colors }] },
+    options: { indexAxis: 'y', responsive: true }
+  });
+}
+
+function switchToChart() {
+  document.getElementById("cardContainer").classList.add("hidden");
+  document.getElementById("chartContainer").classList.remove("hidden");
+  document.querySelector(".sort-bar").classList.add("hidden");
+  if (chart) chart.destroy();
 }
 
 function showDetail(name) {
-  const d = fullData.find(d => d.name === name);
+  const d = fullData[currentTab].find(d => d.name === name);
   document.getElementById("modalName").innerText = name + " 出勤明細";
   const ul = document.getElementById("modalList");
   ul.innerHTML = "";
@@ -78,8 +176,13 @@ document.getElementById("modalClose").onclick = () => {
   document.getElementById("modal").classList.add("hidden");
 };
 
-document.getElementById("photoModalClose").onclick = () => {
-  document.getElementById("photoModal").classList.add("hidden");
-};
+document.querySelectorAll(".tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentTab = btn.dataset.tab;
+    renderTab();
+  });
+});
 
 loadData();
