@@ -51,6 +51,7 @@ function renderTable(type) {
     renderNormalTable(container, data, type);
   }
 }
+
 function renderNormalTable(container, data, type) {
   const table = document.createElement('table');
   table.innerHTML = `<thead><tr>
@@ -154,7 +155,6 @@ document.querySelectorAll('.tab').forEach(btn => {
     const type = e.target.dataset.type;
     document.getElementById(type).classList.add('active');
 
-    // 🚩 Patch 1: 強制關閉所有 Modal 防止遮罩殘留
     document.getElementById("modal").classList.add("hidden");
     document.getElementById("photoModal").classList.add("hidden");
 
@@ -238,7 +238,6 @@ function renderChartD() {
     options: { responsive: true, indexAxis: 'y' }
   });
 }
-
 function showDetail(name, type) {
   const item = fullData[type].find(d => d.name === name);
   document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
@@ -259,11 +258,23 @@ function showDetail(name, type) {
 }
 
 document.getElementById("modalClose").onclick = () => {
-  document.getElementById("modal").classList.add("hidden");
+  const modal = document.getElementById("modal");
+  modal.classList.add("hidden");
+  modal.style.zIndex = "-1";
+  modal.style.opacity = "0";
+  modal.style.pointerEvents = "none";
+  modal.style.display = "none";
 };
 
 document.getElementById("modal").addEventListener("click", function(e) {
-  if (e.target === e.currentTarget) this.classList.add("hidden");
+  if (e.target === e.currentTarget) {
+    const modal = document.getElementById("modal");
+    modal.classList.add("hidden");
+    modal.style.zIndex = "-1";
+    modal.style.opacity = "0";
+    modal.style.pointerEvents = "none";
+    modal.style.display = "none";
+  }
 });
 
 function showPhoto(src) {
@@ -272,11 +283,23 @@ function showPhoto(src) {
 }
 
 document.getElementById("photoModalClose").onclick = () => {
-  document.getElementById("photoModal").classList.add("hidden");
+  const photoModal = document.getElementById("photoModal");
+  photoModal.classList.add("hidden");
+  photoModal.style.zIndex = "-1";
+  photoModal.style.opacity = "0";
+  photoModal.style.pointerEvents = "none";
+  photoModal.style.display = "none";
 };
 
 document.getElementById("photoModal").addEventListener("click", function(e) {
-  if (e.target === e.currentTarget) this.classList.add("hidden");
+  if (e.target === e.currentTarget) {
+    const photoModal = document.getElementById("photoModal");
+    photoModal.classList.add("hidden");
+    photoModal.style.zIndex = "-1";
+    photoModal.style.opacity = "0";
+    photoModal.style.pointerEvents = "none";
+    photoModal.style.display = "none";
+  }
 });
 
 loadData();
