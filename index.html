@@ -2,96 +2,24 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>WingStars Stats</title>
+  <title>WingStars Stats - RWD卡片版</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
 
-<div class="tab-bar">
-  <button class="tab active" data-type="home">主場戰績</button>
-  <button class="tab" data-type="away">客場戰績</button>
-  <button class="tab" data-type="combined">總戰績</button>
-  <button class="tab" data-type="attendance">出勤排行</button>
-  <button class="tab" data-type="chartA">勝率排行</button>
-  <button class="tab" data-type="chartC">主客場勝率比較</button>
-  <button class="tab" data-type="chartD">連勝連敗排行</button>
+<div class="header">
+  <h1>WingStars Stats 勝率排行</h1>
 </div>
 
-<div id="home" class="tab-content active">
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>WS</th>
-          <th>排名</th>
-          <th>成員</th>
-          <th>出賽數</th>
-          <th>勝場數</th>
-          <th>敗場數</th>
-          <th>目前連勝/敗</th>
-          <th>勝率</th>
-          <th>出勤明細</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<div class="sort-bar">
+  排序依據：
+  <button onclick="sortBy('winRate')">勝率</button>
+  <button onclick="sortBy('total')">出賽數</button>
+  <button onclick="sortBy('current')">目前連勝/敗</button>
 </div>
 
-<div id="away" class="tab-content">
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>WS</th>
-          <th>排名</th>
-          <th>成員</th>
-          <th>出賽數</th>
-          <th>勝場數</th>
-          <th>敗場數</th>
-          <th>目前連勝/敗</th>
-          <th>勝率</th>
-          <th>出勤明細</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-<div id="combined" class="tab-content">
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>WS</th>
-          <th>排名</th>
-          <th>成員</th>
-          <th>出賽數</th>
-          <th>勝場數</th>
-          <th>敗場數</th>
-          <th>目前連勝/敗</th>
-          <th>勝率</th>
-          <th>出勤明細</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-<div id="chartA" class="tab-content">
-  <canvas id="canvasA"></canvas>
-</div>
-
-<div id="chartC" class="tab-content">
-  <canvas id="canvasC"></canvas>
-</div>
-
-<div id="chartD" class="tab-content">
-  <canvas id="canvasD"></canvas>
-</div>
+<div id="cardContainer" class="card-container"></div>
 
 <div id="modal" class="modal hidden">
   <div class="modal-content">
@@ -108,7 +36,7 @@
   </div>
 </div>
 
-<div id="loading">Loading...</div>
+<div id="loading">資料讀取中...</div>
 
 </body>
 </html>
