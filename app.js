@@ -264,7 +264,7 @@ document.getElementById("photoModal").addEventListener("click", function(e) {
     photoModal.style.opacity = "0";
     photoModal.style.pointerEvents = "none";
     photoModal.style.display = "none";
-  }
+  } 
 });
 
 loadData();
