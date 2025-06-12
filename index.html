@@ -2,14 +2,25 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>WingStars Stats - RWD卡片版</title>
+  <title>WingStars Stats - 全功能卡片版</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
 
 <div class="header">
-  <h1>WingStars Stats 勝率排行</h1>
+  <h1>WingStars Stats 勝率系統</h1>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" data-tab="combined">總戰績</button>
+  <button class="tab" data-tab="home">主場戰績</button>
+  <button class="tab" data-tab="away">客場戰績</button>
+  <button class="tab" data-tab="attendance">出勤排行</button>
+  <button class="tab" data-tab="chartA">勝率排行</button>
+  <button class="tab" data-tab="chartC">主客場勝率比較</button>
+  <button class="tab" data-tab="chartD">連勝連敗排行</button>
 </div>
 
 <div class="sort-bar">
@@ -20,6 +31,10 @@
 </div>
 
 <div id="cardContainer" class="card-container"></div>
+
+<div id="chartContainer" class="chart-container hidden">
+  <canvas id="chartCanvas"></canvas>
+</div>
 
 <div id="modal" class="modal hidden">
   <div class="modal-content">
