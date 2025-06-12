@@ -6,7 +6,36 @@ async function loadData() {
   const res = await fetch('cheerleader_stats_data.json');
   fullData = await res.json();
   document.getElementById("loading").style.display = "none";
+
+  // 先為三個戰績計算排名
+  ['home', 'away', 'combined'].forEach(type => calculateRank(type));
+
+  // 再渲染表格
   ['home', 'away', 'combined'].forEach(type => renderTable(type));
+}
+
+function calculateRank(type) {
+  const data = [...fullData[type]];
+  data.sort((a, b) => b.winRate - a.winRate);
+  let currentRank = 1;
+  let sameCount = 1;
+
+  data.forEach((item, index) => {
+    if (index > 0 && item.winRate === data[index - 1].winRate) {
+      item.rank = data[index - 1].rank;
+      sameCount++;
+    } else {
+      item.rank = currentRank;
+      currentRank += sameCount;
+      sameCount = 1;
+    }
+  });
+
+  // 將排名回寫到原本的 fullData
+  data.forEach(item => {
+    const original = fullData[type].find(d => d.name === item.name);
+    original.rank = item.rank;
+  });
 }
 
 function toHalfWidth(str) {
@@ -22,7 +51,6 @@ function calcAxisLimit(values) {
   max = Math.min(100, max);
   return { min, max };
 }
-
 function renderTable(type) {
   const container = document.querySelector(`#${type} .table-container`);
   container.innerHTML = "";
@@ -51,13 +79,20 @@ function renderTable(type) {
     renderNormalTable(container, data, type);
   }
 }
+
 function renderNormalTable(container, data, type) {
   const table = document.createElement('table');
   table.innerHTML = `<thead><tr>
-      <th>照片</th><th data-field="name">成員</th><th data-field="total">出賽數</th>
-      <th data-field="win">勝場數</th><th data-field="lose">敗場數</th>
-      <th data-field="current">目前連勝/敗</th><th data-field="winRate">勝率</th>
-      <th>出勤明細</th></tr></thead><tbody></tbody>`;
+      <th>WS</th>
+      <th data-field="rank">排名</th>
+      <th data-field="name">成員</th>
+      <th data-field="total">出賽數</th>
+      <th data-field="win">勝場數</th>
+      <th data-field="lose">敗場數</th>
+      <th data-field="current">目前連勝/敗</th>
+      <th data-field="winRate">勝率</th>
+      <th>出勤明細</th>
+    </tr></thead><tbody></tbody>`;
 
   const tbody = table.querySelector('tbody');
   data.forEach(item => {
@@ -68,6 +103,7 @@ function renderNormalTable(container, data, type) {
     row.innerHTML = `<td>
         <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img" onclick="showPhoto('images/${imageName}.jpg')">
       </td>
+      <td>${item.rank}</td>
       <td>${item.name}</td><td>${item.total}</td><td>${item.win}</td><td>${item.lose}</td>
       <td>${item.current}</td><td>${(item.winRate*100).toFixed(1)}%</td>
       <td><button class='view-btn' onclick='showDetail("${item.name}","${type}")'>查看</button></td>`;
@@ -86,7 +122,6 @@ function renderNormalTable(container, data, type) {
     }
   });
 }
-
 function renderCardTable(container, data, type) {
   data.forEach(item => {
     const imageName = toHalfWidth(item.name)
@@ -100,6 +135,7 @@ function renderCardTable(container, data, type) {
         <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img" onclick="showPhoto('images/${imageName}.jpg')">
         <div class="mobile-name">${item.name}</div>
       </div>
+      <div class="mobile-data">排名：${item.rank}</div>
       <div class="mobile-data">出賽數：${item.total}</div>
       <div class="mobile-data">勝場數：${item.win}</div>
       <div class="mobile-data">敗場數：${item.lose}</div>
@@ -110,6 +146,7 @@ function renderCardTable(container, data, type) {
     container.appendChild(card);
   });
 }
+
 function renderAttendanceTable() {
   const container = document.querySelector('#attendance .table-container');
   container.innerHTML = "";
@@ -145,7 +182,6 @@ function renderAttendanceTable() {
     container.appendChild(table);
   }
 }
-
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', e => {
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -170,73 +206,7 @@ document.querySelectorAll('.tab').forEach(btn => {
     }
   });
 });
-function renderChartA() {
-  const ctx = document.getElementById("canvasA").getContext("2d");
-  const data = [...fullData['combined']].sort((a,b)=>b.winRate-a.winRate);
-  const labels = data.map(d => d.name);
-  const winRates = data.map(d => +(d.winRate * 100).toFixed(1));
-  const axis = calcAxisLimit(winRates);
 
-  new Chart(ctx, {
-    type: 'bar',
-    data: { labels: labels, datasets: [{ label: '勝率 %', data: winRates }] },
-    options: {
-      responsive: true, indexAxis: 'y',
-      scales: { x: { min: axis.min, max: axis.max, ticks: { stepSize: 10 } } }
-    }
-  });
-}
-
-function renderChartC() {
-  const ctx = document.getElementById("canvasC").getContext("2d");
-  const combined = fullData['combined'];
-  const home = fullData['home'];
-  const away = fullData['away'];
-  const labels = combined.map(d => d.name);
-  const homeRates = home.map(d => +(d.winRate * 100).toFixed(1));
-  const awayRates = away.map(d => +(d.winRate * 100).toFixed(1));
-  const allRates = homeRates.concat(awayRates);
-  const axis = calcAxisLimit(allRates);
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        { label: '主場勝率', data: homeRates, backgroundColor:'#99ccff' },
-        { label: '客場勝率', data: awayRates, backgroundColor:'#ff99cc' }
-      ]
-    },
-    options: {
-      responsive: true, indexAxis: 'y',
-      scales: { x: { min: axis.min, max: axis.max, ticks: { stepSize: 10 } } }
-    }
-  });
-}
-
-function renderChartD() {
-  const ctx = document.getElementById("canvasD").getContext("2d");
-  let data = [...fullData['combined']];
-  data = data.map(d => {
-    let val = 0;
-    if (d.current.includes("連勝")) val = parseInt(d.current);
-    if (d.current.includes("連敗")) val = -parseInt(d.current);
-    return {...d, streakVal: val};
-  }).sort((a,b)=>b.streakVal-a.streakVal);
-
-  const labels = data.map(d => d.name);
-  const streaks = data.map(d => d.streakVal);
-  const colors = streaks.map(v => v < 0 ? "#ff7777" : "#77b5ff");
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{ label: '目前連勝/連敗', data: streaks, backgroundColor: colors }]
-    },
-    options: { responsive: true, indexAxis: 'y' }
-  });
-}
 function showDetail(name, type) {
   const item = fullData[type].find(d => d.name === name);
   document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
