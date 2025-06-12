@@ -51,7 +51,6 @@ function renderTable(type) {
     renderNormalTable(container, data, type);
   }
 }
-
 function renderNormalTable(container, data, type) {
   const table = document.createElement('table');
   table.innerHTML = `<thead><tr>
