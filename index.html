@@ -2,65 +2,32 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>WingStars Stats</title>
+  <title>WingStars 勝率統計</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script defer src="app.js"></script>
 </head>
 <body>
-
-<div class="tab-bar">
-  <button class="tab active" data-type="home">主場戰績</button>
-  <button class="tab" data-type="away">客場戰績</button>
-  <button class="tab" data-type="combined">總戰績</button>
-  <button class="tab" data-type="attendance">出勤排行</button>
-  <button class="tab" data-type="chartA">勝率排行</button>
-  <button class="tab" data-type="chartC">主客場勝率比較</button>
-  <button class="tab" data-type="chartD">連勝連敗排行</button>
-</div>
-<div id="home" class="tab-content active">
-  <div class="table-container"></div>
-</div>
-
-<div id="away" class="tab-content">
-  <div class="table-container"></div>
-</div>
-
-<div id="combined" class="tab-content">
-  <div class="table-container"></div>
-</div>
-
-<div id="attendance" class="tab-content">
-  <div class="table-container"></div>
-</div>
-
-<div id="chartA" class="tab-content">
-  <canvas id="canvasA"></canvas>
-</div>
-
-<div id="chartC" class="tab-content">
-  <canvas id="canvasC"></canvas>
-</div>
-
-<div id="chartD" class="tab-content">
-  <canvas id="canvasD"></canvas>
-</div>
-<div id="modal" class="modal hidden">
-  <div class="modal-content">
-    <span class="close" id="modalClose">&times;</span>
-    <h2 id="modalName"></h2>
-    <ul id="modalList"></ul>
+  <div class="tabs">
+    <button class="tabButton active" onclick="renderCards('home')">主場戰績</button>
+    <button class="tabButton" onclick="renderCards('away')">客場戰績</button>
+    <button class="tabButton" onclick="renderCards('combined')">總戰績</button>
+    <button class="tabButton" onclick="renderAttendance()">出勤排行</button>
+    <button class="tabButton" onclick="renderWinRate()">勝率排行</button>
+    <button class="tabButton" onclick="renderCompare()">主客場勝率比較</button>
+    <button class="tabButton" onclick="renderStreak()">連勝連敗排行</button>
   </div>
-</div>
 
-<div id="photoModal" class="modal hidden">
-  <div class="modal-content">
-    <span class="close" id="photoModalClose">&times;</span>
-    <img id="photoModalImg" class="photo-img">
+  <div id="content"></div>
+
+  <!-- 照片 Modal -->
+  <div id="photoModal" class="modal hidden" onclick="closePhotoModal()">
+    <img id="modalImage" src="">
   </div>
-</div>
 
-<div id="loading">Loading....</div>
- 
+  <!-- 出勤明細 Modal -->
+  <div id="detailModal" class="modal hidden" onclick="closeDetailModal()">
+    <div class="modalContent" id="detailContent"></div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
