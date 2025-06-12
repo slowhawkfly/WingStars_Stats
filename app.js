@@ -231,6 +231,13 @@ document.getElementById("modalClose").onclick = () => {
   modal.style.display = "none";
 };
 
+
+function showPhoto(src) {
+  document.getElementById('photoModalImg').src = src;
+  document.getElementById('photoModal').classList.remove("hidden");
+}
+
+
 document.getElementById("modal").addEventListener("click", function(e) {
   if (e.target === e.currentTarget) {
     const modal = document.getElementById("modal");
@@ -241,11 +248,6 @@ document.getElementById("modal").addEventListener("click", function(e) {
     modal.style.display = "none";
   }
 });
-
-function showPhoto(src) {
-  document.getElementById('photoModalImg').src = src;
-  document.getElementById('photoModal').classList.remove("hidden");
-}
 
 document.getElementById("photoModalClose").onclick = () => {
   const photoModal = document.getElementById("photoModal");
