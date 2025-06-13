@@ -1,12 +1,17 @@
 let fullData = {};
 let sortState = { "combined": null, "home": null, "away": null };
-let chartRendered = { "chartA": false, "chartC": false, "chartD": false, "attendance": false };
+let chartRendered = { "chartA": false, "chartC": false, "chartD": false };
 
 async function loadData() {
-  const res = await fetch('cheerleader_stats_data.json');
-  fullData = await res.json();
-  document.getElementById("loading").style.display = "none";
-  ['home', 'away', 'combined'].forEach(type => renderTable(type));
+  try {
+    const basePath = window.location.pathname.replace(/\/[^\/]*$/, '/');
+    const res = await fetch(`${basePath}cheerleader_stats_data.json?v=20250613`);
+    fullData = await res.json();
+    document.getElementById("loading").style.display = "none";
+    ['home', 'away', 'combined'].forEach(type => renderTable(type));
+  } catch (e) {
+    console.error("LoadData Error:", e);
+  }
 }
 
 function toHalfWidth(str) {
@@ -22,7 +27,6 @@ function calcAxisLimit(values) {
   max = Math.min(100, max);
   return { min, max };
 }
-
 function renderTable(type) {
   const container = document.querySelector(`#${type} .table-container`);
   container.innerHTML = "";
@@ -51,6 +55,7 @@ function renderTable(type) {
     renderNormalTable(container, data, type);
   }
 }
+
 function renderNormalTable(container, data, type) {
   const table = document.createElement('table');
   table.innerHTML = `<thead><tr>
@@ -86,7 +91,6 @@ function renderNormalTable(container, data, type) {
     }
   });
 }
-
 function renderCardTable(container, data, type) {
   data.forEach(item => {
     const imageName = toHalfWidth(item.name)
@@ -110,6 +114,7 @@ function renderCardTable(container, data, type) {
     container.appendChild(card);
   });
 }
+
 function renderAttendanceTable() {
   const container = document.querySelector('#attendance .table-container');
   container.innerHTML = "";
@@ -237,6 +242,7 @@ function renderChartD() {
     options: { responsive: true, indexAxis: 'y' }
   });
 }
+
 function showDetail(name, type) {
   const item = fullData[type].find(d => d.name === name);
   document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
@@ -259,20 +265,11 @@ function showDetail(name, type) {
 document.getElementById("modalClose").onclick = () => {
   const modal = document.getElementById("modal");
   modal.classList.add("hidden");
-  modal.style.zIndex = "-1";
-  modal.style.opacity = "0";
-  modal.style.pointerEvents = "none";
-  modal.style.display = "none";
 };
 
 document.getElementById("modal").addEventListener("click", function(e) {
   if (e.target === e.currentTarget) {
-    const modal = document.getElementById("modal");
-    modal.classList.add("hidden");
-    modal.style.zIndex = "-1";
-    modal.style.opacity = "0";
-    modal.style.pointerEvents = "none";
-    modal.style.display = "none";
+    document.getElementById("modal").classList.add("hidden");
   }
 });
 
@@ -282,22 +279,12 @@ function showPhoto(src) {
 }
 
 document.getElementById("photoModalClose").onclick = () => {
-  const photoModal = document.getElementById("photoModal");
-  photoModal.classList.add("hidden");
-  photoModal.style.zIndex = "-1";
-  photoModal.style.opacity = "0";
-  photoModal.style.pointerEvents = "none";
-  photoModal.style.display = "none";
+  document.getElementById("photoModal").classList.add("hidden");
 };
 
 document.getElementById("photoModal").addEventListener("click", function(e) {
   if (e.target === e.currentTarget) {
-    const photoModal = document.getElementById("photoModal");
-    photoModal.classList.add("hidden");
-    photoModal.style.zIndex = "-1";
-    photoModal.style.opacity = "0";
-    photoModal.style.pointerEvents = "none";
-    photoModal.style.display = "none";
+    document.getElementById("photoModal").classList.add("hidden");
   }
 });
 
