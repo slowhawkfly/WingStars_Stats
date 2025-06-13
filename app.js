@@ -170,6 +170,44 @@ function renderChartD() {
     }
   });
 }
+
+function renderAttendanceTable() {
+  const container = document.querySelector('#attendance .table-container');
+  container.innerHTML = "";
+
+  const data = [...fullData['combined']].sort((a,b)=>b.total - a.total);
+
+  if (window.innerWidth <= 768) {
+    data.forEach(item => {
+      const imageName = toHalfWidth(item.name)
+        .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, '')
+        .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+
+      const card = document.createElement('div');
+      card.className = 'mobile-card';
+      card.innerHTML = `
+        <div class="mobile-header">
+          <img src="images/${imageName}.jpg" onerror="this.src='default.png'" class="avatar-img" onclick="showPhoto('images/${imageName}.jpg')">
+          <div class="mobile-name">${item.name}</div>
+        </div>
+        <div class="mobile-data">出賽數：${item.total}</div>
+      `;
+      container.appendChild(card);
+    });
+
+  } else {
+    const table = document.createElement('table');
+    table.innerHTML = `<thead><tr><th>成員</th><th>出賽數</th></tr></thead><tbody></tbody>`;
+
+    const tbody = table.querySelector('tbody');
+    data.forEach(item => {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${item.name}</td><td>${item.total}</td>`;
+      tbody.appendChild(row);
+    });
+    container.appendChild(table);
+  }
+}
 function showDetail(name, type) {
   const item = fullData[type].find(d => d.name === name);
   document.getElementById('modalName').innerText = `${item.name} 出勤明細`;
